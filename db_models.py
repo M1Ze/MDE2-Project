@@ -7,7 +7,7 @@ class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     identifier = db.Column(db.String(100), unique=True, nullable=False)  # Unique patient identifier (SVN)
     name = db.Column(db.String(200), nullable=False)  # Patient's full name
-    birth_date = db.Column(db.Date, nullable=False)  # Birth date of the patient
+    birth_date = db.Column(db.Date, nullable=False)  # Birthdate of the patient
     gender = db.Column(db.String(10), nullable=False)  # Gender of the patient ('male', 'female', 'other', 'unknown')
     address = db.Column(db.String(500))  # Address details
     contact_phone = db.Column(db.String(200)) # phone information
@@ -22,7 +22,7 @@ class HealthData(db.Model):
     data_type = db.Column(db.String(50), nullable=False)  # Type of Oberservation
     data_aqu_datetime = db.Column(db.DateTime, nullable=False) # aquistiton date and Time
     data = db.Column(db.Text, nullable=False)  # JSON data for FHIR resource
-
+    
     patient = db.relationship('Patient', backref=db.backref('health_records', lazy=True))
 
 class User(db.Model):
