@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>New User - Personal Information</h2>
+<form method="POST">
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    <div class="mb-3">
+        <label for="surname" class="form-label">Surname</label>
+        <input type="text" class="form-control" id="surname" name="surname" required>
+    </div>
+    <div class="mb-3">
+        <label for="birth_date" class="form-label">Date of Birth</label>
+        <input type="date" class="form-control text-uppercase" id="birth_date" name="birth_date" required>
+    </div>
+    <div class="mb-3">
+        <label for="ssn" class="form-label">Social Security Number</label>
+        <input type="text" class="form-control" id="ssn" name="ssn" maxlength="10" pattern="\d{1,10}"
+        title="Please enter up to 10 digits only." required>
+    </div>
+    <div class="mb-3">
+        <label for="address" class="form-label">Address</label>
+        <input type="text" class="form-control" id="address" name="address" required>
+    </div>
+    <div class="mb-3">
+        <label for="native_language" class="form-label">Native Language</label>
+            <select class="form-control" id="native_language" name="native_language" required>
+                <option value="German">German</option>
+                <option disabled>──────────</option>
+                <option value="Arabic">Arabic</option>
+                <option value="Chinese">Chinese</option>
+                <option value="English">English</option>
+                <option value="French">French</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Italian">Italian</option>
+                <option value="Japanese">Japanese</option>
+                <option value="Korean">Korean</option>
+                <option value="Portuguese">Portuguese</option>
+                <option value="Russian">Russian</option>
+                <option value="Spanish">Spanish</option>
+                <option value="Swahili">Swahili</option>
+                <option value="Turkish">Turkish</option>
+                <option value="Urdu">Urdu</option>
+            </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="phone_number" class="form-label">Phone Number</label>
+        <input type="tel" class="form-control" id="phone_number" name="phone_number" required>
+    </div>
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+    </div>
+    <div class="mb-3">
+        <label for="gender" class="form-label">Gender</label>
+        <select class="form-control" id="gender" name="gender">
+            <option value="leer"> </option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+            <option value="Unknown">Unknown</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Emergency Contacts</label>
+        <div id="emergency_contacts_container">
+            <div class="emergency-contact mb-3">
+                <input type="text" class="form-control mb-2" name="emergency_contact_name[]" placeholder="Contact Name" required>
+                <input type="tel" class="form-control" name="emergency_contact_phone[]" placeholder="Contact Phone Number" required>
+            </div>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Save & Next</button>
+</form>
+
+<style>
+    #birth_date {
+        text-transform: uppercase;
+    }
+</style>
+
+{% endblock %}
