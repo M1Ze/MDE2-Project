@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Medical Information</h2>
+<form method="POST">
+    <div class="mb-3">
+        <label for="height" class="form-label">Height (cm)</label>
+        <input type="number" class="form-control" id="height" name="height" required>
+    </div>
+    <div class="mb-3">
+        <label for="weight" class="form-label">Weight (kg)</label>
+        <input type="number" class="form-control" id="weight" name="weight" required>
+    </div>
+    <div class="mb-3">
+        <label for="blood_type" class="form-label">Blood Type</label>
+        <select class="form-control" id="blood_type" name="blood_type" required>
+            <option value="" disabled selected>Select your blood type</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="allergies_question" class="form-label">Do you have any allergies or intolerances?</label>
+        <select class="form-control" id="allergies_question" onchange="toggleAllergies()">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+        </select>
+        <div id="allergies_container" style="display: none;" class="mt-3">
+            <label class="form-label">Please list them:</label>
+            <div class="allergy-item">
+                <input type="text" class="form-control mb-2" name="allergies[]" placeholder="Enter an allergy or intolerance">
+                <button type="button" class="btn btn-danger btn-sm mb-2" onclick="removeAllergy(this)">Remove</button>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="addAllergy()">Add Allergy</button>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="chronic_diseases_question" class="form-label">Do you have any chronic diseases?</label>
+        <select class="form-control" id="chronic_diseases_question" onchange="toggleChronicDiseases()">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+        </select>
+        <div id="chronic_diseases_container" style="display: none;" class="mt-3">
+            <label class="form-label">Please list them:</label>
+            <div class="chronic-disease-item">
+                <input type="text" class="form-control mb-2" name="chronic_diseases[]" placeholder="Enter a chronic disease">
+                <button type="button" class="btn btn-danger btn-sm mb-2" onclick="removeChronicDisease(this)">Remove</button>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="addChronicDisease()">Add Chronic Disease</button>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="care_level" class="form-label">Care Level</label>
+        <select class="form-control" id="care_level" name="care_level">
+            <option value="None">No Care Required</option>
+            <option value="Level 1">Level 1 - Low care need (65+ hours/month)</option>
+            <option value="Level 2">Level 2 - Moderate care need (95+ hours/month)</option>
+            <option value="Level 3">Level 3 - Elevated care need (120+ hours/month)</option>
+            <option value="Level 4">Level 4 - Severe care need (160+ hours/month)</option>
+            <option value="Level 5">Level 5 - Special care need (180+ hours/month)</option>
+            <option value="Level 6">Level 6 - Unable to lead an independent life</option>
+            <option value="Level 7">Level 7 - Fully bedridden or equivalent</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="dnr" class="form-label">DNR (Do Not Resuscitate)</label>
+        <select class="form-control" id="dnr" name="dnr">
+            <option value="No">Yes, I want to get resuscitated</option>
+            <option value="Yes">No, I do not want to get resuscitated</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+<script>
+    function toggleAllergies() {
+        const select = document.getElementById('allergies_question');
+        const container = document.getElementById('allergies_container');
+        container.style.display = select.value === 'Yes' ? 'block' : 'none';
+    }
+
+    function addAllergy() {
+        const container = document.getElementById('allergies_container');
+        const allergyItem = document.createElement('div');
+        allergyItem.className = 'allergy-item';
+        allergyItem.innerHTML = `
+            <input type="text" class="form-control mb-2" name="allergies[]" placeholder="Enter an allergy or intolerance">
+            <button type="button" class="btn btn-danger btn-sm mb-2" onclick="removeAllergy(this)">Remove</button>
+        `;
+        container.insertBefore(allergyItem, container.lastChild.previousSibling);
+    }
+
+    function removeAllergy(button) {
+        const allergyItem = button.parentElement;
+        allergyItem.remove();
+    }
+
+
+    function toggleChronicDiseases() {
+        const select = document.getElementById('chronic_diseases_question');
+        const container = document.getElementById('chronic_diseases_container');
+        container.style.display = select.value === 'Yes' ? 'block' : 'none';
+    }
+
+    function addChronicDisease() {
+        const container = document.getElementById('chronic_diseases_container');
+        const diseaseItem = document.createElement('div');
+        diseaseItem.className = 'chronic-disease-item';
+        diseaseItem.innerHTML = `
+            <input type="text" class="form-control mb-2" name="chronic_diseases[]" placeholder="Enter a chronic disease">
+            <button type="button" class="btn btn-danger btn-sm mb-2" onclick="removeChronicDisease(this)">Remove</button>
+        `;
+        container.insertBefore(diseaseItem, container.lastChild.previousSibling);
+    }
+
+    function removeChronicDisease(button) {
+        const diseaseItem = button.parentElement;
+        diseaseItem.remove();
+    }
+</script>
+{% endblock %}
