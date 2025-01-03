@@ -1,5 +1,11 @@
 from fhir.resources.medication import Medication as FHIRMedication
-
+import os
+from fhir.resources.medication import Medication
+from fhir.resources.organization import Organization
+from fhir.resources.codeableconcept import CodeableConcept
+from fhir.resources.ratio import Ratio
+from fhir.resources.quantity import Quantity
+from fhir.resources.reference import Reference
 
 
 class MedicationData:
@@ -9,6 +15,8 @@ class MedicationData:
         self.dose_form = ""  # Dosage form (e.g., tablet, capsule)
         self.manufacturer = ""  # Manufacturer details
         self.ingredients = []  # List of ingredients with quantities
+        self.patient_id = ""  # Patient ID to link the medication
+        self.patient_name = ""  # Patient Name for display purposes
 
     def extract_data(self, filepath):
         # Read JSON file and parse it into a FHIR Medication resource
@@ -41,14 +49,16 @@ class MedicationData:
                 }
                 self.ingredients.append(ingredient_details)
 
-
-    def create_fhire(self, filepath):
+    def create_fhire(self, filepath, patient_folder):
         import os
         from fhir.resources.medication import Medication
-        from fhir.resources.organization import Organization
         from fhir.resources.codeableconcept import CodeableConcept
+        from fhir.resources.organization import Organization
         from fhir.resources.ratio import Ratio
         from fhir.resources.quantity import Quantity
+
+        # Ensure the patient folder exists
+        os.makedirs(patient_folder, exist_ok=True)
 
         # Create FHIR Medication resource
         medication_resource = Medication(
@@ -69,10 +79,10 @@ class MedicationData:
             ] if self.manufacturer else None,
             ingredient=[
                 {
-                    "item": CodeableConcept(
+                    "item": {"concept": CodeableConcept(
                         text=ingredient["item"]
-                    ) if ingredient["item"] else None,
-                    "strength": Ratio(
+                    )} if ingredient["item"] else None,
+                    "strengthRatio": Ratio(
                         numerator=Quantity(
                             value=float(ingredient["quantity"].split(" ")[0]),
                             code=ingredient["quantity"].split(" ")[1],
@@ -85,9 +95,11 @@ class MedicationData:
 
         # Create the file path
         filename = self.name.replace(" ", "_") + "_" + str(self.identifier.replace(".", ""))
-        medication_fhire_resource = f"medication_{filename}.json"
+        patient_filename = self.patient_name.replace(" ", "_") + "_" + str(self.patient_id)
+        medication_fhire_resource = f"medication_{filename}_{patient_filename}.json"
         full_path = os.path.join(filepath, medication_fhire_resource)
 
         # Serialize the resource to JSON
         with open(full_path, "w") as file:
             file.write(medication_resource.json(indent=4))
+
