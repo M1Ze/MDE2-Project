@@ -39,6 +39,12 @@
   "encounter" : {
     "reference" : "Encounter/example"
   },
+  "performer": [
+    {
+      "reference": "Patient",
+      "display": "Pieter van de Heuvel"
+    }
+  ],
   "effectiveDateTime" : "2016-03-28",
   "valueQuantity" : {
     "value" : 185,
