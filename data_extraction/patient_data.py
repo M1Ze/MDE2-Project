@@ -65,97 +65,6 @@ class PatientData:
                 self.contacts.append({"name": contact_name, "phone": contact_phone})
 
 
-    # def create_fhire(self, filepath):
-    #     from datetime import datetime
-    #
-    #     # Create the FHIR Patient resource
-    #     patient_resource = Patient.model_construct()
-    #
-    #     # Populate identifier
-    #     if self.identifier:
-    #         patient_resource.identifier = [
-    #             {"system": "http://example.org/fhir/identifier", "value": self.identifier}
-    #         ]
-    #
-    #     # Populate name
-    #     if self.name:
-    #         name_parts = self.name.split(" ")
-    #         patient_resource.name = [
-    #             HumanName.model_construct(
-    #                 family=name_parts[-1], given=name_parts[:-1]
-    #             )
-    #         ]
-    #
-    #     # Convert birthdate to ISO format (YYYY-MM-DD)
-    #     if self.birthdate:
-    #         try:
-    #             # Convert from known formats to ISO
-    #             if "." in self.birthdate:
-    #                 birthdate_obj = datetime.strptime(self.birthdate, "%d.%m.%Y")
-    #             elif "/" in self.birthdate:
-    #                 birthdate_obj = datetime.strptime(self.birthdate, "%m/%d/%Y")
-    #             else:
-    #                 birthdate_obj = datetime.strptime(self.birthdate, "%Y-%m-%d")
-    #             patient_resource.birthDate = birthdate_obj.strftime("%Y-%m-%d")
-    #         except ValueError:
-    #             raise ValueError(
-    #                 f"Invalid date format for birthdate: {self.birthdate}. "
-    #                 "Expected formats are DD.MM.YYYY, MM/DD/YYYY, or YYYY-MM-DD."
-    #             )
-    #
-    #     # Populate gender
-    #     if self.gender:
-    #         patient_resource.gender = self.gender
-    #
-    #     # Populate address
-    #     if self.address:
-    #         address_parts = self.address.split(", ")
-    #         patient_resource.address = [
-    #             Address.model_construct(
-    #                 line=[address_parts[0]],
-    #                 city=address_parts[1] if len(address_parts) > 1 else None,
-    #                 state=address_parts[2] if len(address_parts) > 2 else None,
-    #                 postalCode=address_parts[3] if len(address_parts) > 3 else None,
-    #             )
-    #         ]
-    #
-    #     # Populate telecom
-    #     patient_resource.telecom = []
-    #     if self.phone:
-    #         patient_resource.telecom.append(
-    #             ContactPoint.model_construct(system="phone", value=self.phone, use="home")
-    #         )
-    #     if self.email:
-    #         patient_resource.telecom.append(
-    #             ContactPoint.model_construct(system="email", value=self.email, use="home")
-    #         )
-    #
-    #     # Populate contacts
-    #     if self.contacts:
-    #         patient_resource.contact = []
-    #         for contact in self.contacts:
-    #             contact_name = HumanName.model_construct(
-    #                 family=contact["name"].split(" ")[-1],
-    #                 given=contact["name"].split(" ")[:-1],
-    #             )
-    #             contact_telecom = [
-    #                 ContactPoint.model_construct(
-    #                     system="phone", value=contact["phone"], use="mobile"
-    #                 )
-    #             ]
-    #             patient_resource.contact.append(
-    #                 {"name": contact_name, "telecom": contact_telecom}
-    #             )
-    #
-    #     # Create the file path
-    #     filename = self.name.replace(" ", "_") + "_" + str(self.identifier.replace(".", ""))
-    #     patient_fhire_resource = f"patient_{filename}.json"
-    #     full_path = os.path.join(filepath, patient_fhire_resource)
-    #
-    #     # Serialize the resource to JSON
-    #     with open(full_path, "w") as file:
-    #         file.write(patient_resource.json(indent=4))
-
     def create_fhire(self, filepath):
         from datetime import datetime
         from fhir.resources.humanname import HumanName
@@ -163,90 +72,46 @@ class PatientData:
         from fhir.resources.address import Address
 
         # Create the FHIR Patient resource
-        patient_resource = Patient.construct()
-
-        # Populate identifier
-        if self.identifier:
-            patient_resource.identifier = [
+        patient_resource = Patient(
+            identifier=[
                 {"system": "http://example.org/fhir/identifier", "value": self.identifier}
+            ] if self.identifier else None,
+            name=[
+                HumanName(family=self.name.split(" ")[-1], given=self.name.split(" ")[:-1])
+            ] if self.name else None,
+            birthDate=self.format_birthdate(self.birthdate),
+            gender=self.gender if self.gender else None,
+            address=[
+                Address(
+                    line=[self.address.split(", ")[0]],
+                    city=self.address.split(", ")[1] if len(self.address.split(", ")) > 1 else None,
+                    state=self.address.split(", ")[2] if len(self.address.split(", ")) > 2 else None,
+                    postalCode=self.address.split(", ")[3] if len(self.address.split(", ")) > 3 else None,
+                )
+            ] if self.address else None,
+            telecom=[
+                ContactPoint(system="phone", value=self.phone, use="home")
+                if self.phone
+                else None,
+                ContactPoint(system="email", value=self.email, use="home")
+                if self.email
+                else None,
+            ],
+            contact=[
+                {
+                    "name": HumanName(
+                        family=contact["name"].split(" ")[-1],
+                        given=contact["name"].split(" ")[:-1],
+                    ),
+                    "telecom": [
+                        ContactPoint(system="phone", value=contact["phone"], use="mobile")
+                    ],
+                }
+                for contact in self.contacts
             ]
-
-        # Populate name with validation
-        if self.name:
-            name_parts = self.name.split(" ")
-            patient_resource.name = [
-                HumanName.validate(
-                    {"family": name_parts[-1], "given": name_parts[:-1]}
-                )
-            ]
-
-        # Convert birthdate to ISO format
-        if self.birthdate:
-            try:
-                if "." in self.birthdate:
-                    birthdate_obj = datetime.strptime(self.birthdate, "%d.%m.%Y")
-                elif "/" in self.birthdate:
-                    birthdate_obj = datetime.strptime(self.birthdate, "%m/%d/%Y")
-                else:
-                    birthdate_obj = datetime.strptime(self.birthdate, "%Y-%m-%d")
-                patient_resource.birthDate = birthdate_obj.strftime("%Y-%m-%d")
-            except ValueError:
-                raise ValueError(
-                    f"Invalid date format for birthdate: {self.birthdate}. "
-                    "Expected formats are DD.MM.YYYY, MM/DD/YYYY, or YYYY-MM-DD."
-                )
-
-        # Populate gender
-        if self.gender:
-            patient_resource.gender = self.gender
-
-        # Populate address with validation
-        if self.address:
-            address_parts = self.address.split(", ")
-            patient_resource.address = [
-                Address.validate(
-                    {
-                        "line": [address_parts[0]],
-                        "city": address_parts[1] if len(address_parts) > 1 else None,
-                        "state": address_parts[2] if len(address_parts) > 2 else None,
-                        "postalCode": address_parts[3] if len(address_parts) > 3 else None,
-                    }
-                )
-            ]
-
-        # Populate telecom with validation
-        patient_resource.telecom = []
-        if self.phone:
-            patient_resource.telecom.append(
-                ContactPoint.validate(
-                    {"system": "phone", "value": self.phone, "use": "home"}
-                )
-            )
-        if self.email:
-            patient_resource.telecom.append(
-                ContactPoint.validate(
-                    {"system": "email", "value": self.email, "use": "home"}
-                )
-            )
-
-        # Serialize contacts
-        if self.contacts:
-            patient_resource.contact = []
-            for contact in self.contacts:
-                contact_name = HumanName.validate(
-                    {
-                        "family": contact["name"].split(" ")[-1],
-                        "given": contact["name"].split(" ")[:-1],
-                    }
-                )
-                contact_telecom = [
-                    ContactPoint.validate(
-                        {"system": "phone", "value": contact["phone"], "use": "mobile"}
-                    )
-                ]
-                patient_resource.contact.append(
-                    {"name": contact_name, "telecom": contact_telecom}
-                )
+            if self.contacts
+            else None,
+        )
 
         # Create the file path
         filename = self.name.replace(" ", "_") + "_" + str(self.identifier.replace(".", ""))
@@ -256,3 +121,20 @@ class PatientData:
         # Serialize the resource to JSON
         with open(full_path, "w") as file:
             file.write(patient_resource.json(indent=4))
+
+    def format_birthdate(self, birthdate):
+        """
+        Converts the input birthdate to ISO 8601 format (YYYY-MM-DD).
+        """
+        try:
+            if "." in birthdate:
+                return datetime.strptime(birthdate, "%d.%m.%Y").strftime("%Y-%m-%d")
+            elif "/" in birthdate:
+                return datetime.strptime(birthdate, "%m/%d/%Y").strftime("%Y-%m-%d")
+            else:
+                return datetime.strptime(birthdate, "%Y-%m-%d").strftime("%Y-%m-%d")
+        except ValueError:
+            raise ValueError(
+                f"Invalid date format for birthdate: {birthdate}. "
+                "Expected formats are DD.MM.YYYY, MM/DD/YYYY, or YYYY-MM-DD."
+            )
