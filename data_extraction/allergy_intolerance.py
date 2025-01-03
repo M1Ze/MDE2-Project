@@ -16,6 +16,8 @@ class AllergyIntoleranceData:
         self.onset_datetime = ""
         self.recorded_date = ""
         self.reactions = []  # List of reactions (e.g., symptoms)
+        self.patient_id = ""  # Patient ID to link the medication
+        self.patient_name = ""  # Patient Name for display purposes
 
     def extract_data(self, filepath):
         # Read JSON file and parse it into an FHIR resource
