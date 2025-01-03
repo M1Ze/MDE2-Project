@@ -1,0 +1,73 @@
+{
+    "resourceType": "Patient",
+    "identifier": [
+        {
+            "system": "http://example.org/fhir/identifier",
+            "value": "1111010180"
+        }
+    ],
+    "name": [
+        {
+            "family": "Doe",
+            "given": [
+                "John"
+            ]
+        }
+    ],
+    "telecom": [
+        {
+            "system": "phone",
+            "value": "+123456789",
+            "use": "home"
+        },
+        {
+            "system": "email",
+            "value": "johndoe@example.com",
+            "use": "home"
+        }
+    ],
+    "gender": "male",
+    "birthDate": "1980-01-01",
+    "address": [
+        {
+            "line": [
+                "789 Main St"
+            ],
+            "city": "City",
+            "state": "State",
+            "postalCode": "1357"
+        }
+    ],
+    "contact": [
+        {
+            "name": {
+                "family": "Doe",
+                "given": [
+                    "Jane"
+                ]
+            },
+            "telecom": [
+                {
+                    "system": "phone",
+                    "value": "+987654321",
+                    "use": "mobile"
+                }
+            ]
+        },
+        {
+            "name": {
+                "family": "Smith",
+                "given": [
+                    "Emily"
+                ]
+            },
+            "telecom": [
+                {
+                    "system": "phone",
+                    "value": "+192837465",
+                    "use": "mobile"
+                }
+            ]
+        }
+    ]
+}
