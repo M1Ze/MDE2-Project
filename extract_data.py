@@ -1,7 +1,9 @@
 import glob
 import os
 
-from PatientData import PatientData, ObservationData, Medication
+from data_extraction.patient_data import PatientData
+from data_extraction.observation_data import ObservationData
+from data_extraction.medication import Medication
 from db_models import Patient
 
 #filepath to json
