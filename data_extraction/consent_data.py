@@ -6,8 +6,9 @@ class ConsentData:
         self.status = ""  # Status of the consent
         self.scope = ""   # Scope of the consent
         self.category = []  # List of categories
-        self.dateTime = ""  # Date and time of the consent
-        self.provision = ""  # Description of the consent provision
+        self.provision_period_start = ""  # Start of the provision period
+        self.provision_period_end = ""  # End of the provision period
+        self.provision_text = ""  # Text description of the provision
 
     def extract_data(self, filepath):
         # Read the JSON file and parse it into a FHIR resource
@@ -32,9 +33,15 @@ class ConsentData:
             for cat in consent.category
         ] if consent.category else []
 
-        self.dateTime = consent.dateTime if consent.dateTime else None
+        if consent.provision and consent.provision.period:
+            self.provision_period_start = (
+                consent.provision.period.start if consent.provision.period.start else None
+            )
+            self.provision_period_end = (
+                consent.provision.period.end if consent.provision.period.end else None
+            )
 
-        self.provision = (
+        self.provision_text = (
             consent.provision.text if consent.provision and consent.provision.text
             else None
         )
