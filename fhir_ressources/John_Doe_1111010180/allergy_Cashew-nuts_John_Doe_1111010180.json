@@ -1,0 +1,90 @@
+{
+    "resourceType": "AllergyIntolerance",
+    "id": "allergy-Cashew-nuts",
+    "identifier": [
+        {
+            "system": "http://example.org/fhir/identifier",
+            "value": "allergy001"
+        }
+    ],
+    "clinicalStatus": {
+        "coding": [
+            {
+                "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+                "code": "active",
+                "display": "Active"
+            }
+        ]
+    },
+    "verificationStatus": {
+        "coding": [
+            {
+                "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+                "code": "confirmed",
+                "display": "Confirmed"
+            }
+        ]
+    },
+    "type": {
+        "coding": [
+            {
+                "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-type",
+                "code": "allergy"
+            }
+        ]
+    },
+    "category": [
+        "food"
+    ],
+    "criticality": "high",
+    "code": {
+        "coding": [
+            {
+                "system": "http://snomed.info/sct",
+                "display": "Cashew nuts"
+            }
+        ]
+    },
+    "patient": {
+        "reference": "Patient/1111010180",
+        "display": "John Doe"
+    },
+    "onsetDateTime": "2004",
+    "recordedDate": "2025-01-01",
+    "reaction": [
+        {
+            "substance": {
+                "coding": [
+                    {
+                        "system": "http://snomed.info/sct",
+                        "display": "Cashew nut allergenic extract Injectable Product"
+                    }
+                ]
+            },
+            "manifestation": [
+                {
+                    "concept": {
+                        "coding": [
+                            {
+                                "system": "http://snomed.info/sct",
+                                "display": "Anaphylactic reaction"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "concept": {
+                        "coding": [
+                            {
+                                "system": "http://snomed.info/sct",
+                                "display": "Urticaria"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "description": "Severe reaction to cashew nuts.",
+            "severity": "severe"
+        }
+    ]
+}
