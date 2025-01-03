@@ -53,6 +53,12 @@ class AllergyIntoleranceData:
 
     def create_fhire(self, filepath):
         # Create the FHIR AllergyIntolerance resource
+
+        # Create the folder path for the patient
+        folder_name = f"{self.name.replace(' ', '_')}_{self.identifier.replace('.', '')}"
+        patient_folder = os.path.join(filepath, folder_name)
+        os.makedirs(patient_folder, exist_ok=True)
+
         allergy_resource = AllergyIntolerance(
             identifier=[
                 {"system": "http://example.org/fhir/identifier", "value": self.identifier}
