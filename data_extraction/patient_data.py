@@ -63,16 +63,10 @@ class PatientData:
                 )
                 self.contacts.append({"name": contact_name, "phone": contact_phone})
 
+
     def create_fhire(self, filepath):
-        patient_fhire_resource = f"patient_{filename}.json"
-        full_path = os.path.join(filepath, patient_fhire_resource)
-        with open(full_path, "w") as file:
-            file.write("{}")
-
-
-    def create_fhire(self, filepath, filename):
         # Create the FHIR Patient resource
-        patient_resource = Patient.construct()
+        patient_resource = Patient.model_construct()
 
         # Populate identifier
         if self.identifier:
@@ -84,7 +78,7 @@ class PatientData:
         if self.name:
             name_parts = self.name.split(" ")
             patient_resource.name = [
-                HumanName.construct(
+                HumanName.model_construct(
                     family=name_parts[-1], given=name_parts[:-1]
                 )
             ]
@@ -101,7 +95,7 @@ class PatientData:
         if self.address:
             address_parts = self.address.split(", ")
             patient_resource.address = [
-                Address.construct(
+                Address.model_construct(
                     line=[address_parts[0]],
                     city=address_parts[1] if len(address_parts) > 1 else None,
                     state=address_parts[2] if len(address_parts) > 2 else None,
@@ -113,23 +107,23 @@ class PatientData:
         patient_resource.telecom = []
         if self.phone:
             patient_resource.telecom.append(
-                ContactPoint.construct(system="phone", value=self.phone, use="home")
+                ContactPoint.model_construct(system="phone", value=self.phone, use="home")
             )
         if self.email:
             patient_resource.telecom.append(
-                ContactPoint.construct(system="email", value=self.email, use="home")
+                ContactPoint.model_construct(system="email", value=self.email, use="home")
             )
 
         # Populate contacts
         if self.contacts:
             patient_resource.contact = []
             for contact in self.contacts:
-                contact_name = HumanName.construct(
+                contact_name = HumanName.model_construct(
                     family=contact["name"].split(" ")[-1],
                     given=contact["name"].split(" ")[:-1],
                 )
                 contact_telecom = [
-                    ContactPoint.construct(
+                    ContactPoint.model_construct(
                         system="phone", value=contact["phone"], use="mobile"
                     )
                 ]
@@ -138,7 +132,8 @@ class PatientData:
                 )
 
         # Write the Patient resource to a JSON file
+        filename = self.name + "_" + str(self.identifier)
         patient_fhire_resource = f"patient_{filename}.json"
         full_path = os.path.join(filepath, patient_fhire_resource)
         with open(full_path, "w") as file:
-            json.dump(patient_resource.dict(), file, indent=4)
+            json.dump(patient_resource.model_dump(), file, indent=4)
