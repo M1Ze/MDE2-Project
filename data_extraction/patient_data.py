@@ -71,6 +71,11 @@ class PatientData:
         from fhir.resources.contactpoint import ContactPoint
         from fhir.resources.address import Address
 
+        # Create the folder path for the patient
+        folder_name = f"{self.name.replace(' ', '_')}_{self.identifier.replace('.', '')}"
+        patient_folder = os.path.join(filepath, folder_name)
+        os.makedirs(patient_folder, exist_ok=True)
+
         # Create the FHIR Patient resource
         patient_resource = Patient(
             identifier=[
@@ -116,7 +121,7 @@ class PatientData:
         # Create the file path
         filename = self.name.replace(" ", "_") + "_" + str(self.identifier.replace(".", ""))
         patient_fhire_resource = f"patient_{filename}.json"
-        full_path = os.path.join(filepath, patient_fhire_resource)
+        full_path = os.path.join(patient_folder, patient_fhire_resource)
 
         # Serialize the resource to JSON
         with open(full_path, "w") as file:
