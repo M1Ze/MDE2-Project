@@ -10,11 +10,10 @@ class PatientData:
         self.email = ""
         self.identifier = ""
         self.native_language = ""
-        self.contact_person_name = ""
-        self.contact_person_phone = ""
+        self.contacts = []  # List of contact persons
 
     def extract_data(self, filepath):
-        # json file einlesen um FHIR ressource draus zu machen
+        # Read JSON file and parse it into a FHIR Patient resource
         with open(filepath, "r") as file:
             json_string = file.read()
         patient = Patient.parse_raw(json_string)
@@ -27,7 +26,8 @@ class PatientData:
         self.gender = patient.gender if patient.gender else None
         self.address = (
             ", ".join(filter(
-                None,patient.address[0].line + [patient.address[0].city, patient.address[0].state, patient.address[0].postalCode])) if patient.address else None
+                None, patient.address[0].line + [patient.address[0].city, patient.address[0].state, patient.address[0].postalCode]))
+            if patient.address else None
         )
         self.phone = next(
             (telecom.value for telecom in patient.telecom if telecom.system == "phone"), None
@@ -42,18 +42,17 @@ class PatientData:
             patient.communication[0].language.coding[0].display
             if patient.communication else None
         )
-        self.contact_person_name = (
-            " ".join(patient.contact[0].name.given)
-            + " "
-            + patient.contact[0].name.family
-            if patient.contact
-               and patient.contact[0].name
-               and hasattr(patient.contact[0].name, "given")
-               and isinstance(patient.contact[0].name.given, list)
-            else patient.contact[0].name.family
-            if patient.contact and patient.contact[0].name else None)
 
-        self.contact_person_phone = next(
-            (telecom.value for telecom in patient.contact[0].telecom if telecom.system == "phone"),
-            None,
-        ) if patient.contact else None
+        # Extract all contact persons (not only one)
+        if patient.contact:
+            for contact in patient.contact:
+                contact_name = (
+                    " ".join(contact.name.given) + " " + contact.name.family
+                    if contact.name and hasattr(contact.name, "given") and isinstance(contact.name.given, list)
+                    else contact.name.family if contact.name else None
+                )
+                contact_phone = next(
+                    (telecom.value for telecom in contact.telecom if telecom.system == "phone"),
+                    None,
+                )
+                self.contacts.append({"name": contact_name, "phone": contact_phone})
