@@ -1,0 +1,15 @@
+{
+    "short_name": "My App",
+    "name": "My Flask Application",
+    "icons": [
+        {
+            "src": "/static/images/favicon144.png",
+            "type": "image/png",
+            "sizes": "144x144"
+        }
+    ],
+    "start_url": "/",
+    "display": "standalone",
+    "theme_color": "#00509e",
+    "background_color": "#ffffff"
+}
