@@ -7,6 +7,8 @@ class MedicationData:
         self.dose_form = ""  # Dosage form (e.g., tablet, capsule)
         self.manufacturer = ""  # Manufacturer details
         self.ingredients = []  # List of ingredients with quantities
+        self.patient_id = ""  # Patient ID to link the medication
+        self.patient_name = ""  # Patient Name for display purposes
 
     def extract_data(self, filepath):
         # Read JSON file and parse it into a FHIR Medication resource
