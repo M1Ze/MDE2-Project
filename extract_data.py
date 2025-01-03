@@ -3,7 +3,7 @@ import os
 
 from data_extraction.patient_data import PatientData
 from data_extraction.observation_data import ObservationData
-from data_extraction.medication import Medication
+from data_extraction.medication import MedicationData
 from db_models import Patient
 
 #filepath to json
@@ -11,6 +11,7 @@ file_path_patient_example_1 = "fhir_ressources/patient_example_1.json"
 file_path_patient_example_2 = "fhir_ressources/patient_example_2.json"
 file_path_observation_example1 = "fhir_ressources/observation_example_1.json"
 file_path_observation_example2 = "fhir_ressources/observation_example_2.json"
+file_path_observation_example3 = "fhir_ressources/observation_example_3.json"
 
 Patient1 = PatientData()
 Patient1.extract_data(file_path_patient_example_1)
@@ -28,7 +29,7 @@ Observation2.extract_data(file_path_observation_example2)
 directory = "fhir_ressources/medications"
 files = glob.glob(os.path.join(directory, "*.json"))
 Medications = []
-Medication = Medication()
+Medication = MedicationData()
 
 # Process each file
 for file_path in files:
