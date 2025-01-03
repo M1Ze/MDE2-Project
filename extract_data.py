@@ -25,6 +25,9 @@ Observation1.extract_data(file_path_observation_example1)
 Observation2 = ObservationData()
 Observation2.extract_data(file_path_observation_example2)
 
+Observation3 = ObservationData()
+Observation3.extract_data(file_path_observation_example3)
+
 #Medication
 directory = "fhir_ressources/medications"
 files = glob.glob(os.path.join(directory, "*.json"))
@@ -41,6 +44,7 @@ for file_path in files:
 #Übergabe an DB:
 print(Patient1.name)
 print(Patient1.address)
+print(Patient1.contacts)
 
 print(Patient2.name)
 print(Patient2.address)
@@ -49,6 +53,8 @@ print(Patient2.address)
 print(Observation1.type,": ", Observation1.data)
 
 print(Observation2.type,": ", Observation2.data)
+
+print(Observation3.type,": ", Observation3.data)
 
 print(Medications)
 
