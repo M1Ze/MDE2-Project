@@ -1,0 +1,54 @@
+{
+    "resourceType": "Medication",
+    "contained": [
+        {
+            "resourceType": "Organization",
+            "id": "organization1",
+            "name": "Generic Pharma Inc."
+        }
+    ],
+    "identifier": [
+        {
+            "system": "http://example.org/fhir/identifier",
+            "value": "med001"
+        }
+    ],
+    "code": {
+        "text": "Ibuprofen"
+    },
+    "doseForm": {
+        "coding": [
+            {
+                "display": "Tablet"
+            }
+        ]
+    },
+    "ingredient": [
+        {
+            "item": {
+                "concept": {
+                    "text": "Ibuprofen"
+                }
+            },
+            "strengthRatio": {
+                "numerator": {
+                    "value": 200.0,
+                    "code": "mg"
+                }
+            }
+        },
+        {
+            "item": {
+                "concept": {
+                    "text": "Inactive Ingredients"
+                }
+            },
+            "strengthRatio": {
+                "numerator": {
+                    "value": 50.0,
+                    "code": "mg"
+                }
+            }
+        }
+    ]
+}

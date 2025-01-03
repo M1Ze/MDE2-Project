@@ -2,6 +2,7 @@ import glob
 import os
 
 from data_extraction.allergy_intolerance import AllergyIntoleranceData
+from data_extraction.medication_data import MedicationData
 
 #
 # from data_extraction.patient_data import PatientData
@@ -31,26 +32,50 @@ from data_extraction.allergy_intolerance import AllergyIntoleranceData
 # print(patient4.address)
 # print(patient4.contacts)
 
-allergy = AllergyIntoleranceData()
-allergy.identifier = "allergy001"
-allergy.clinical_status = "Active"
-allergy.verification_status = "Confirmed"
-allergy.allergy_type = "allergy"  # Valid system code will be added in the method
-allergy.category = "food"
-allergy.criticality = "high"
-allergy.code = "Cashew nuts"
-allergy.onset_datetime = "2004"
-allergy.recorded_date = "2025-01-01"
-allergy.patient_name = "John Doe"
-allergy.patient_id = "1111010180"
-allergy.reactions = [
-    {
-        "substance": "Cashew nut allergenic extract Injectable Product",
-        "manifestations": ["Anaphylactic reaction", "Urticaria"],
-        "severity": "severe",
-        "description": "Severe reaction to cashew nuts.",
-    }
-]
+# allergy = AllergyIntoleranceData()
+# allergy.identifier = "allergy001"
+# allergy.clinical_status = "Active"
+# allergy.verification_status = "Confirmed"
+# allergy.allergy_type = "allergy"  # Valid system code will be added in the method
+# allergy.category = "food"
+# allergy.criticality = "high"
+# allergy.code = "Cashew nuts"
+# allergy.onset_datetime = "2004"
+# allergy.recorded_date = "2025-01-01"
+# allergy.patient_name = "John Doe"
+# allergy.patient_id = "1111010180"
+# allergy.reactions = [
+#     {
+#         "substance": "Cashew nut allergenic extract Injectable Product",
+#         "manifestations": ["Anaphylactic reaction", "Urticaria"],
+#         "severity": "severe",
+#         "description": "Severe reaction to cashew nuts.",
+#     }
+# ]
+#
+# # Pass `patient_id` as a string
+# allergy.create_fhire(base_path="fhir_resources", patient_folder="fhir_ressources/John_Doe_1111010180")
 
-# Pass `patient_id` as a string
-allergy.create_fhire(base_path="fhir_resources", patient_folder="fhir_ressources/John_Doe_1111010180")
+
+# Define test data
+medication = MedicationData()
+medication.identifier = "med001"
+medication.name = "Ibuprofen"
+medication.dose_form = "Tablet"
+medication.manufacturer = "Generic Pharma Inc."
+medication.ingredients = [
+    {"item": "Ibuprofen", "quantity": "200 mg"},
+    {"item": "Inactive Ingredients", "quantity": "50 mg"},
+]
+medication.patient_id = "1111010180"
+medication.patient_name = "John Doe"
+
+# Set the file path
+test_filepath = "fhir_ressources/John_Doe_1111010180"
+
+# Call create_fhire
+try:
+    medication.create_fhire(filepath=test_filepath, patient_folder=test_filepath)
+    print("Medication resource created successfully.")
+except Exception as e:
+    print(f"Error creating Medication resource: {e}")
