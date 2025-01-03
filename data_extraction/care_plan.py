@@ -1,41 +1,44 @@
-from fhir.resources.observation import Observation
+from fhir.resources.careplan import CarePlan
 
-class ObservationData:
+class CarePlanData:
     def __init__(self):
         self.identifier = ""
-        self.type = "" #Type of observation
-        self.data_aqu_datetime = ""
-        self.data = "" # String with value + unit
+        self.status = ""  # Status of the care plan
+        self.intent = ""  # Intent of the care plan
+        self.title = ""  # Title or summary of the care plan
+        self.period_start = ""  # Start date of the care plan
+        self.period_end = ""  # End date of the care plan
+        self.category = []  # List of categories
+        self.description = ""  # Summary of the care plan
+        self.activities = []  # List of planned actions or tasks
 
     def extract_data(self, filepath):
-        # json file einlesen um FHIR ressource draus zu machen
+        # Read JSON file and parse it into a FHIR CarePlan resource
         with open(filepath, "r") as file:
             json_string = file.read()
-        observation = Observation.parse_raw(json_string)
+        careplan = CarePlan.parse_raw(json_string)
 
+        # Extract key attributes
         self.identifier = next(
-            (identifier.value for identifier in observation.identifier), None
-        ) if observation.identifier else None
+            (identifier.value for identifier in careplan.identifier), None
+        ) if careplan.identifier else None
 
-        self.type = observation.code.coding[0].display if observation.code else None
+        self.status = careplan.status if careplan.status else None
+        self.intent = careplan.intent if careplan.intent else None
+        self.title = careplan.title if careplan.title else None
 
-        self.data_aqu_datetime = observation.effectiveDateTime if observation.effectiveDateTime else None
+        if careplan.period:
+            self.period_start = careplan.period.start if careplan.period.start else None
+            self.period_end = careplan.period.end if careplan.period.end else None
 
-        if hasattr(observation, "valueQuantity") and observation.valueQuantity:
-            self.data = f"{observation.valueQuantity.value} {observation.valueQuantity.unit}"
-        elif hasattr(observation, "valueCodeableConcept") and observation.valueCodeableConcept:
-            self.data = (
-                observation.valueCodeableConcept.text
-                if observation.valueCodeableConcept.text
-                else observation.valueCodeableConcept.coding[0].display
-                if observation.valueCodeableConcept.coding
-                else None
-            )
-        elif hasattr(observation, "valueString") and observation.valueString:
-            self.data = observation.valueString
-        elif hasattr(observation, "valueBoolean") and observation.valueBoolean is not None:
-            self.data = str(observation.valueBoolean)  # Convert boolean to string
-        elif hasattr(observation, "valueInteger") and observation.valueInteger is not None:
-            self.data = str(observation.valueInteger)  # Convert integer to string
-        else:
-            self.data = None
+        self.category = [
+            category.text for category in careplan.category
+        ] if careplan.category else []
+
+        self.description = careplan.description if careplan.description else None
+
+        if careplan.activity:
+            for activity in careplan.activity:
+                self.activities.append(
+                    activity.detail.description if activity.detail and activity.detail.description else None
+                )
