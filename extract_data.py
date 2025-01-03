@@ -35,6 +35,7 @@ Medication = MedicationData()
 for file_path in files:
     Medication.extract_data(file_path)
     Medications.append(Medication.name)
+    Medications.append(Medication.dose_form)
 
 
 #Übergabe an DB:
