@@ -1,4 +1,8 @@
+import os
+
 from fhir.resources.allergyintolerance import AllergyIntolerance
+from fhir.resources.codeableconcept import CodeableConcept
+from fhir.resources.coding import Coding
 
 class AllergyIntoleranceData:
     def __init__(self):
@@ -46,3 +50,63 @@ class AllergyIntoleranceData:
                     "description": reaction.description if reaction.description else None,
                 }
                 self.reactions.append(reaction_details)
+
+    def create_fhire(self, filepath):
+        # Create the FHIR AllergyIntolerance resource
+        allergy_resource = AllergyIntolerance(
+            identifier=[
+                {"system": "http://example.org/fhir/identifier", "value": self.identifier}
+            ] if self.identifier else None,
+            clinicalStatus=CodeableConcept(
+                coding=[
+                    Coding(system="http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+                           code="active", display=self.clinical_status)
+                ]
+            ) if self.clinical_status else None,
+            verificationStatus=CodeableConcept(
+                coding=[
+                    Coding(system="http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+                           code="confirmed", display=self.verification_status)
+                ]
+            ) if self.verification_status else None,
+            type=self.allergy_type if self.allergy_type else None,
+            category=[self.category] if self.category else None,
+            criticality=self.criticality if self.criticality else None,
+            code=CodeableConcept(
+                coding=[
+                    Coding(system="http://snomed.info/sct", display=self.code)
+                ]
+            ) if self.code else None,
+            onsetDateTime=self.onset_datetime if self.onset_datetime else None,
+            recordedDate=self.recorded_date if self.recorded_date else None,
+            reaction=[
+                {
+                    "substance": CodeableConcept(
+                        coding=[
+                            Coding(system="http://snomed.info/sct", display=reaction["substance"])
+                        ]
+                    ) if reaction["substance"] else None,
+                    "manifestation": [
+                        CodeableConcept(
+                            coding=[
+                                Coding(system="http://snomed.info/sct", display=manifestation)
+                            ]
+                        )
+                        for manifestation in reaction["manifestations"]
+                    ] if reaction["manifestations"] else None,
+                    "severity": reaction["severity"] if reaction["severity"] else None,
+                    "onset": reaction["onset"] if reaction["onset"] else None,
+                    "description": reaction["description"] if reaction["description"] else None,
+                }
+                for reaction in self.reactions
+            ] if self.reactions else None,
+        )
+
+        # Create the file path
+        filename = self.code.replace(" ", "_") if self.code else "allergy_intolerance"
+        allergy_fhire_resource = f"allergy_{filename}.json"
+        full_path = os.path.join(filepath, allergy_fhire_resource)
+
+        # Serialize the resource to JSON
+        with open(full_path, "w") as file:
+            file.write(allergy_resource.json(indent=4))
