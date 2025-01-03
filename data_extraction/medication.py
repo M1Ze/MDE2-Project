@@ -4,7 +4,7 @@ class MedicationData:
     def __init__(self):
         self.identifier = ""
         self.name = ""  # Human-readable name of the medication
-        self.form = ""  # Dosage form (e.g., tablet, capsule)
+        self.dose_form = ""  # Dosage form (e.g., tablet, capsule)
         self.manufacturer = ""  # Manufacturer details
         self.ingredients = []  # List of ingredients with quantities
 
@@ -21,14 +21,20 @@ class MedicationData:
 
         self.name = medication.code.text if medication.code and medication.code.text else None
 
-        self.form = medication.form.coding[0].display if medication.form and medication.form.coding else None
+        self.dose_form = medication.doseForm.coding[0].display if medication.doseForm and medication.doseForm.coding else None
 
-        self.manufacturer = medication.manufacturer.display if medication.manufacturer else None
+        # Extract manufacturer from 'contained'
+        if medication.contained:
+            for contained in medication.contained:
+                if contained.__resource_type__ == "Organization":
+                    self.manufacturer = contained.name if hasattr(contained, "name") else None
+                    break
 
+        # Handle ingredients
         if medication.ingredient:
             for ingredient in medication.ingredient:
                 ingredient_details = {
-                    "item": ingredient.itemCodeableConcept.text if ingredient.itemCodeableConcept and ingredient.itemCodeableConcept.text else None,
-                    "quantity": f"{ingredient.strength.numerator.value} {ingredient.strength.numerator.unit}" if ingredient.strength and ingredient.strength.numerator else None,
+                    "item": ingredient.item.concept.text if ingredient.item and ingredient.item.concept and ingredient.item.concept.text else None,
+                    "quantity": f"{ingredient.strengthRatio.numerator.value} {ingredient.strengthRatio.numerator.code}" if ingredient.strengthRatio and ingredient.strengthRatio.numerator else None,
                 }
                 self.ingredients.append(ingredient_details)
