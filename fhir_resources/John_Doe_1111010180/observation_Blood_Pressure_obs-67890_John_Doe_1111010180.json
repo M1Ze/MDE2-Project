@@ -1,0 +1,25 @@
+{
+    "resourceType": "Observation",
+    "identifier": [
+        {
+            "system": "http://example.org/fhir/identifier",
+            "value": "obs-67890"
+        }
+    ],
+    "status": "final",
+    "code": {
+        "coding": [
+            {
+                "display": "Blood Pressure"
+            }
+        ]
+    },
+    "subject": {
+        "reference": "Patient/1111010180"
+    },
+    "effectiveDateTime": "2025-01-02T14:30:00Z",
+    "valueQuantity": {
+        "value": 120.0,
+        "unit": "mmHg"
+    }
+}
