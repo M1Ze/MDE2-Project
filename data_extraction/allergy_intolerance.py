@@ -58,7 +58,7 @@ class AllergyIntoleranceData:
                 }
                 self.reactions.append(reaction_details)
 
-    def create_fhire(self, base_path, patient_folder):
+    def create_fhir(self, base_path, patient_folder):
         import os
         from fhir.resources.codeableconcept import CodeableConcept
         from fhir.resources.coding import Coding

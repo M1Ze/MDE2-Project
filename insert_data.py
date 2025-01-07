@@ -21,9 +21,9 @@ from data_extraction.medication_data import MedicationData
 # ]
 #
 #
-# patient.create_fhire(filepath = "fhir_ressources")
+# patient.create_fhire(filepath = "fhir_resources")
 #
-# file_path_observation_example4 = "fhir_ressources/patient_John_Doe_1111010180.json"
+# file_path_observation_example4 = "fhir_resources/patient_John_Doe_1111010180.json"
 #
 # patient4 =  PatientData()
 # patient4.extract_data(file_path_observation_example4)
@@ -54,7 +54,7 @@ from data_extraction.medication_data import MedicationData
 # ]
 #
 # # Pass `patient_id` as a string
-# allergy.create_fhire(base_path="fhir_resources", patient_folder="fhir_ressources/John_Doe_1111010180")
+# allergy.create_fhire(base_path="fhir_resources", patient_folder="fhir_resources/John_Doe_1111010180")
 
 
 # Define test data
@@ -71,11 +71,11 @@ medication.patient_id = "1111010180"
 medication.patient_name = "John Doe"
 
 # Set the file path
-test_filepath = "fhir_ressources/John_Doe_1111010180"
+test_filepath = "fhir_resources/John_Doe_1111010180"
 
 # Call create_fhire
 try:
-    medication.create_fhire(filepath=test_filepath, patient_folder=test_filepath)
+    medication.create_fhir(filepath=test_filepath, patient_folder=test_filepath)
     print("Medication resource created successfully.")
 except Exception as e:
     print(f"Error creating Medication resource: {e}")
