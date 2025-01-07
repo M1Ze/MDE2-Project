@@ -2,7 +2,9 @@ import glob
 import os
 
 from data_extraction.allergy_intolerance import AllergyIntoleranceData
+from data_extraction.consent_data import ConsentData
 from data_extraction.medication_data import MedicationData
+from data_extraction.observation_data import ObservationData
 
 #
 # from data_extraction.patient_data import PatientData
@@ -56,26 +58,44 @@ from data_extraction.medication_data import MedicationData
 # # Pass `patient_id` as a string
 # allergy.create_fhire(base_path="fhir_resources", patient_folder="fhir_resources/John_Doe_1111010180")
 
+#
+# # Define test data
+# medication = MedicationData()
+# medication.identifier = "med001"
+# medication.name = "Ibuprofen"
+# medication.dose_form = "Tablet"
+# medication.manufacturer = "Generic Pharma Inc."
+# medication.ingredients = [
+#     {"item": "Ibuprofen", "quantity": "200 mg"},
+#     {"item": "Inactive Ingredients", "quantity": "50 mg"},
+# ]
+# medication.patient_id = "1111010180"
+# medication.patient_name = "John Doe"
 
-# Define test data
-medication = MedicationData()
-medication.identifier = "med001"
-medication.name = "Ibuprofen"
-medication.dose_form = "Tablet"
-medication.manufacturer = "Generic Pharma Inc."
-medication.ingredients = [
-    {"item": "Ibuprofen", "quantity": "200 mg"},
-    {"item": "Inactive Ingredients", "quantity": "50 mg"},
-]
-medication.patient_id = "1111010180"
-medication.patient_name = "John Doe"
+
+# observation = ObservationData()
+# observation.identifier = "obs-67890"
+# observation.type = "Blood Pressure"
+# observation.data_aqu_datetime = "2025-01-02T14:30:00Z"  # ISO 8601 format
+# observation.data = "120 mmHg"  # Example for systolic blood pressure
+# observation.patient_name = "John Doe"
+# observation.patient_id = "1111010180"
+
+
+consent = ConsentData()
+consent.identifier = "consent-12345"
+consent.patient_name = "John Doe"
+consent.patient_id = "1111010180"
+consent.start_date = "2025-01-01"
+consent.end_date = "2026-01-01"
+
 
 # Set the file path
 test_filepath = "fhir_resources/John_Doe_1111010180"
 
 # Call create_fhire
 try:
-    medication.create_fhir(filepath=test_filepath, patient_folder=test_filepath)
+    consent.create_fhir(filepath=test_filepath, patient_folder=test_filepath)
     print("Medication resource created successfully.")
 except Exception as e:
     print(f"Error creating Medication resource: {e}")
