@@ -49,7 +49,7 @@ class MedicationData:
                 }
                 self.ingredients.append(ingredient_details)
 
-    def create_fhire(self, filepath, patient_folder):
+    def create_fhir(self, filepath, patient_folder):
         import os
         from fhir.resources.medication import Medication
         from fhir.resources.codeableconcept import CodeableConcept

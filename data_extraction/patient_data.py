@@ -65,7 +65,7 @@ class PatientData:
                 self.contacts.append({"name": contact_name, "phone": contact_phone})
 
 
-    def create_fhire(self, filepath):
+    def create_fhir(self, filepath):
         from datetime import datetime
         from fhir.resources.humanname import HumanName
         from fhir.resources.contactpoint import ContactPoint

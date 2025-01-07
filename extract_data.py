@@ -7,11 +7,11 @@ from data_extraction.medication_data import MedicationData
 from db_models import Patient
 
 #filepath to json
-file_path_patient_example_1 = "fhir_ressources/patient_example_1.json"
-file_path_patient_example_2 = "fhir_ressources/patient_example_2.json"
-file_path_observation_example1 = "fhir_ressources/observation_example_1.json"
-file_path_observation_example2 = "fhir_ressources/observation_example_2.json"
-file_path_observation_example3 = "fhir_ressources/observation_example_3.json"
+file_path_patient_example_1 = "fhir_resources/patient_example_1.json"
+file_path_patient_example_2 = "fhir_resources/patient_example_2.json"
+file_path_observation_example1 = "fhir_resources/observation_example_1.json"
+file_path_observation_example2 = "fhir_resources/observation_example_2.json"
+file_path_observation_example3 = "fhir_resources/observation_example_3.json"
 
 Patient1 = PatientData()
 Patient1.extract_data(file_path_patient_example_1)
@@ -29,7 +29,7 @@ Observation3 = ObservationData()
 Observation3.extract_data(file_path_observation_example3)
 
 #Medication
-directory = "fhir_ressources/medications"
+directory = "fhir_resources/medications"
 files = glob.glob(os.path.join(directory, "*.json"))
 Medications = []
 Medication = MedicationData()
@@ -73,9 +73,9 @@ patient.contacts = [
 ]
 
 
-patient.create_fhire(filepath = "fhir_ressources")
+patient.create_fhir(filepath ="fhir_resources")
 
-file_path_observation_example4 = "fhir_ressources/patient_John_Doe_1111010180.json"
+file_path_observation_example4 = "fhir_resources/John_Doe_1111010180/patient_John_Doe_1111010180.json"
 
 patient4 =  PatientData()
 patient4.extract_data(file_path_observation_example4)
