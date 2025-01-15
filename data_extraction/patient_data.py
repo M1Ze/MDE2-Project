@@ -6,6 +6,10 @@ from fhir.resources.address import Address
 from fhir.resources.contactpoint import ContactPoint
 from fhir.resources.humanname import HumanName
 from fhir.resources.patient import Patient
+from sqlalchemy.sql.sqltypes import NULLTYPE
+
+from server import json_string
+
 
 class PatientData:
     def __init__(self):
@@ -19,11 +23,14 @@ class PatientData:
         self.native_language = ""
         self.contacts = []  # List of contact persons
 
-    def extract_data(self, filepath):
+    def extract_data(self, filepath, json_string):
         # Read JSON file and parse it into a FHIR Patient resource
-        with open(filepath, "r") as file:
-            json_string = file.read()
-        patient = Patient.parse_raw(json_string)
+        if filepath is not None:
+            with open(filepath, "r") as file:
+                json_string = file.read()
+            patient = Patient.parse_raw(json_string)
+        else:
+            patient = Patient.parse_raw(json_string)
 
         self.name = (
             " ".join(patient.name[0].given) + " " + patient.name[0].family
@@ -65,7 +72,59 @@ class PatientData:
                 self.contacts.append({"name": contact_name, "phone": contact_phone})
 
 
-    def create_fhir(self, filepath):
+    def create_fhir(self):
+        from datetime import datetime
+        from fhir.resources.humanname import HumanName
+        from fhir.resources.contactpoint import ContactPoint
+        from fhir.resources.address import Address
+
+        # Create the FHIR Patient resource
+        patient_resource = Patient(
+            identifier=[
+                {"system": "http://example.org/fhir/identifier", "value": self.identifier}
+            ] if self.identifier else None,
+            name=[
+                HumanName(family=self.name.split(" ")[-1], given=self.name.split(" ")[:-1])
+            ] if self.name else None,
+            birthDate=self.format_birthdate(self.birthdate),
+            gender=self.gender if self.gender else None,
+            address=[
+                Address(
+                    line=[self.address.split(", ")[0]],
+                    city=self.address.split(", ")[1] if len(self.address.split(", ")) > 1 else None,
+                    state=self.address.split(", ")[2] if len(self.address.split(", ")) > 2 else None,
+                    postalCode=self.address.split(", ")[3] if len(self.address.split(", ")) > 3 else None,
+                )
+            ] if self.address else None,
+            telecom=[
+                ContactPoint(system="phone", value=self.phone, use="home")
+                if self.phone
+                else None,
+                ContactPoint(system="email", value=self.email, use="home")
+                if self.email
+                else None,
+            ],
+            contact=[
+                {
+                    "name": HumanName(
+                        family=contact["name"].split(" ")[-1],
+                        given=contact["name"].split(" ")[:-1],
+                    ),
+                    "telecom": [
+                        ContactPoint(system="phone", value=contact["phone"], use="mobile")
+                    ],
+                }
+                for contact in self.contacts
+            ]
+            if self.contacts
+            else None,
+        )
+        return patient_resource.json(indent=4)
+
+
+
+
+    def create_fhir_inFilesystem(self, filepath):
         from datetime import datetime
         from fhir.resources.humanname import HumanName
         from fhir.resources.contactpoint import ContactPoint

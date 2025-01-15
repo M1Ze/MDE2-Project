@@ -7,17 +7,17 @@ from data_extraction.medication_data import MedicationData
 from db_models import Patient
 
 #filepath to json
-file_path_patient_example_1 = "fhir_resources/patient_example_1.json"
-file_path_patient_example_2 = "fhir_resources/patient_example_2.json"
-file_path_observation_example1 = "fhir_resources/observation_example_1.json"
-file_path_observation_example2 = "fhir_resources/observation_example_2.json"
-file_path_observation_example3 = "fhir_resources/observation_example_3.json"
+file_path_patient_example_1 = "../fhir_resources/patient_example_1.json"
+file_path_patient_example_2 = "../fhir_resources/patient_example_2.json"
+file_path_observation_example1 = "../fhir_resources/observation_example_1.json"
+file_path_observation_example2 = "../fhir_resources/observation_example_2.json"
+file_path_observation_example3 = "../fhir_resources/observation_example_3.json"
 
 Patient1 = PatientData()
-Patient1.extract_data(file_path_patient_example_1)
+Patient1.extract_data(file_path_patient_example_1, None)
 
 Patient2 = PatientData()
-Patient2.extract_data(file_path_patient_example_2)
+Patient2.extract_data(file_path_patient_example_2, None)
 
 Observation1 = ObservationData()
 Observation1.extract_data(file_path_observation_example1)
@@ -73,9 +73,9 @@ patient.contacts = [
 ]
 
 
-patient.create_fhir(filepath ="fhir_resources")
+patient.create_fhir(filepath ="../fhir_resources")
 
-file_path_observation_example4 = "fhir_resources/John_Doe_1111010180/patient_John_Doe_1111010180.json"
+file_path_observation_example4 = "../fhir_resources/John_Doe_1111010180/patient_John_Doe_1111010180.json"
 
 patient4 =  PatientData()
 patient4.extract_data(file_path_observation_example4)
