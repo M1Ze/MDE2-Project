@@ -1,4 +1,7 @@
+import os
 from fhir.resources.observation import Observation
+from fhir.resources.codeableconcept import CodeableConcept
+from fhir.resources.quantity import Quantity
 
 class ObservationData:
     def __init__(self):
@@ -7,11 +10,14 @@ class ObservationData:
         self.data_aqu_datetime = ""
         self.data = "" # String with value + unit
 
-    def extract_data(self, filepath):
+    def extract_data(self, filepath, json_string):
         # json file einlesen um FHIR ressource draus zu machen
-        with open(filepath, "r") as file:
-            json_string = file.read()
-        observation = Observation.parse_raw(json_string)
+        if filepath is not None:
+            with open(filepath, "r") as file:
+                json_string = file.read()
+            observation = Observation.parse_raw(json_string)
+        else:
+            observation = Observation.parse_raw(json_string)
 
         self.identifier = next(
             (identifier.value for identifier in observation.identifier), None
@@ -40,11 +46,34 @@ class ObservationData:
         else:
             self.data = None
 
-    def create_fhir(self, filepath, patient_folder):
+    def create_fhir(self):
         import os
         from fhir.resources.observation import Observation
         from fhir.resources.codeableconcept import CodeableConcept
         from fhir.resources.quantity import Quantity
+
+        # Create FHIR Observation resource
+        observation_resource = Observation(
+            identifier=[
+                {"system": "http://example.org/fhir/identifier", "value": self.identifier}
+            ] if self.identifier else None,
+            status="final",  # Assuming "final" for this example
+            code=CodeableConcept(
+                coding=[{"display": self.type}]
+            ) if self.type else None,
+            subject={"reference": f"Patient/{self.patient_id}"} if self.patient_id else None,
+            effectiveDateTime=self.data_aqu_datetime if self.data_aqu_datetime else None,
+            valueQuantity=Quantity(
+                value=float(self.data.split(" ")[0]),
+                unit=self.data.split(" ")[1]
+            ) if self.data and " " in self.data else None,
+            valueString=self.data if self.data and not " " in self.data else None
+        )
+
+        return observation_resource.json(indent=4)
+
+    def create_fhir_inFilesystem(self, filepath, patient_folder):
+
 
         # Ensure the patient folder exists
         os.makedirs(patient_folder, exist_ok=True)

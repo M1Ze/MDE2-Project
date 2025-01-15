@@ -1,3 +1,4 @@
+#db_models.py
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -8,8 +9,9 @@ class Patient(db.Model):
     identifier = db.Column(db.String(100), unique=True, nullable=False)  # Unique patient identifier (SVN)
     name = db.Column(db.String(200), nullable=False)  # Patient's full name
     pat_data = db.Column(db.Text, nullable=False)  # JSON data for FHIR resource
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Foreign key to User
 
-    user = db.relationship('User', backref=db.backref('patient_information', lazy=True) )
+    user = db.relationship('User', backref=db.backref('patients', lazy=True))
 
 class HealthData(db.Model):
     __tablename__ = 'health_data'

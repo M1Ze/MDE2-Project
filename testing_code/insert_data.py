@@ -1,12 +1,12 @@
 import glob
 import os
 
-from data_extraction.allergy_intolerance import AllergyIntoleranceData
+from data_extraction.allergy_intolerance_data import AllergyIntoleranceData
 from data_extraction.consent_data import ConsentData
 from data_extraction.medication_data import MedicationData
 from data_extraction.observation_data import ObservationData
 
-#
+
 # from data_extraction.patient_data import PatientData
 #
 # patient = PatientData()
@@ -22,8 +22,9 @@ from data_extraction.observation_data import ObservationData
 #     {"name": "Emily Smith", "phone": "+192837465"}
 # ]
 #
-#
-# patient.create_fhire(filepath = "fhir_resources")
+# print(patient.create_fhir())
+
+
 #
 # file_path_observation_example4 = "fhir_resources/patient_John_Doe_1111010180.json"
 #
@@ -59,20 +60,20 @@ from data_extraction.observation_data import ObservationData
 # allergy.create_fhire(base_path="fhir_resources", patient_folder="fhir_resources/John_Doe_1111010180")
 
 #
-# Define test data
-medication = MedicationData()
-medication.identifier = "med001"
-medication.name = "Ibuprofen"
-medication.dose_form = "Tablet"
-medication.manufacturer = "Generic Pharma Inc."
-medication.ingredients = [
-    {"item": "Ibuprofen", "quantity": "200 mg"},
-    {"item": "Inactive Ingredients", "quantity": "50 mg"},
-]
-medication.patient_id = "1111010180"
-medication.patient_name = "John Doe"
-
-medication.create_fhir('x', 'x')
+# # Define test data
+# medication = MedicationData()
+# medication.identifier = "med001"
+# medication.name = "Ibuprofen"
+# medication.dose_form = "Tablet"
+# medication.manufacturer = "Generic Pharma Inc."
+# medication.ingredients = [
+#     {"item": "Ibuprofen", "quantity": "200 mg"},
+#     {"item": "Inactive Ingredients", "quantity": "50 mg"},
+# ]
+# medication.patient_id = "1111010180"
+# medication.patient_name = "John Doe"
+#
+# medication.create_fhir('testing_code', 'testing_code')
 
 
 
