@@ -93,13 +93,15 @@ class MedicationData:
             ] if self.ingredients else None,
         )
 
-        # Create the file path
-        filename = self.name.replace(" ", "_") + "_" + str(self.identifier.replace(".", ""))
-        patient_filename = self.patient_name.replace(" ", "_") + "_" + str(self.patient_id)
-        medication_fhire_resource = f"medication_{filename}_{patient_filename}.json"
-        full_path = os.path.join(filepath, medication_fhire_resource)
+        print(medication_resource.json(indent=4))
 
-        # Serialize the resource to JSON
-        with open(full_path, "w") as file:
-            file.write(medication_resource.json(indent=4))
+        # # Create the file path
+        # filename = self.name.replace(" ", "_") + "_" + str(self.identifier.replace(".", ""))
+        # patient_filename = self.patient_name.replace(" ", "_") + "_" + str(self.patient_id)
+        # medication_fhire_resource = f"medication_{filename}_{patient_filename}.json"
+        # full_path = os.path.join(filepath, medication_fhire_resource)
+        #
+        # # Serialize the resource to JSON
+        # with open(full_path, "w") as file:
+        #     file.write(medication_resource.json(indent=4))
 

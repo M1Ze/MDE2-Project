@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <title>User Appointments</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/appointments_user" style="font-size: 3rem; border: 7px solid #0d6efd;
+             border-radius: 15px; padding: 10px;">BookYourDoc</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav" style="font-size: 2rem;">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="/appointments">Appointments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/loginPage">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/register">Register</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+<div class="container mt-5">
+
+    <div class="row">
+        <!-- User Information -->
+        {% if patient %}
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-center">User Information</h5>
+                    <p><strong>Name:</strong> {{ patient.name[0].given[0] }} {{ patient.name[0].family }}</p>
+                    <p><strong>Email:</strong> {{ patient.telecom[0].value }}</p>
+                    <p><strong>Phone:</strong> {{ patient.telecom[1].value }}</p>
+                    <p><strong>Gender:</strong> {{ patient.gender }}</p>
+                    <p><strong>Birthdate:</strong> {{ patient.birthDate }}</p>
+                    <p><strong>Address:</strong> {{ patient.address[0].line[0] }},
+                        {{ patient.address[0].city }},
+                        {{ patient.address[0].postalCode }},
+                        {{ patient.address[0].state }},
+                        {{ patient.address[0].country }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <!-- Appointments -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-center">User Appointments</h5>
+
+                    {% if appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Practitioner</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for appt in appointments %}
+                            <tr>
+                                <td>{{ appt.practitioner.name }}</td>
+                                <td>{{ appt.date.strftime('%A, %d %b %Y') }}</td>
+                                <td>{{ appt.date.strftime('%H:%M') }}</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center">You have no appointments scheduled.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -91,3 +91,4 @@ class ConsentData:
         # Serialize the resource to JSON
         with open(full_path, "w") as file:
             file.write(consent_resource.json(indent=4))
+
