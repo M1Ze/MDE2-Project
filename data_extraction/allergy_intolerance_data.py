@@ -67,6 +67,16 @@ class AllergyIntoleranceData:
                 self.reactions.append(reaction_details)
 
     def create_fhir(self):
+        # Valid criticality values according to FHIR specification
+        VALID_CRITICALITY_VALUES = ["low", "high", "unable-to-assess"]
+
+        # Validate the criticality field
+        criticality_value = self.criticality.lower() if self.criticality else None
+        if criticality_value not in VALID_CRITICALITY_VALUES:
+            raise ValueError(
+                f"Invalid criticality value. Must be one of {VALID_CRITICALITY_VALUES}, but got '{self.criticality}'"
+            )
+
         # Create the FHIR AllergyIntolerance resource
         allergy_resource = AllergyIntolerance(
             id=f"allergy-{self.code.replace(' ', '-')}",  # Replace invalid characters
@@ -98,7 +108,7 @@ class AllergyIntoleranceData:
                 ]
             ) if self.allergy_type else None,
             category=[self.category] if self.category else None,
-            criticality=self.criticality,
+            criticality=criticality_value,  # Use the validated criticality value
             code=CodeableConcept(
                 coding=[
                     Coding(system="http://snomed.info/sct", display=self.code)
@@ -133,7 +143,6 @@ class AllergyIntoleranceData:
         )
 
         return allergy_resource.json(indent=4)
-
 
     def create_fhir_inFilesystem(self, base_path, patient_folder):
 

@@ -1,11 +1,10 @@
 import os
 
-from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.medication import Medication
-from fhir.resources.medication import Medication as FHIRMedication
+from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.organization import Organization
-from fhir.resources.quantity import Quantity
 from fhir.resources.ratio import Ratio
+from fhir.resources.quantity import Quantity
 
 
 class MedicationData:
@@ -23,9 +22,9 @@ class MedicationData:
         if filepath is not None:
             with open(filepath, "r") as file:
                 json_string = file.read()
-            medication = FHIRMedication.parse_raw(json_string)
+            medication = Medication.parse_raw(json_string)
         else:
-            medication = FHIRMedication.parse_raw(json_string)
+            medication = Medication.parse_raw(json_string)
 
         # Extract key attributes
         self.identifier = next(
@@ -40,7 +39,7 @@ class MedicationData:
         # Extract manufacturer from 'contained'
         if medication.contained:
             for contained in medication.contained:
-                if contained.__resource_type__ == "Organization":
+                if contained.resource_type == "Organization":
                     self.manufacturer = contained.name if hasattr(contained, "name") else None
                     break
 
@@ -53,9 +52,51 @@ class MedicationData:
                 }
                 self.ingredients.append(ingredient_details)
 
-
     def create_fhir(self):
-        # Create FHIR Medication resource
+        from fhir.resources.codeablereference import CodeableReference
+
+        # Create the base Medication resource
+        medication = Medication.construct(
+            resourceType="Medication",
+            identifier=[{
+                "system": "http://example.org/fhir/identifier",
+                "value": self.identifier
+            }],
+            code=CodeableConcept.construct(text=self.name),
+            doseForm=CodeableConcept.construct(coding=[{"display": self.dose_form}]),
+        )
+
+        # Add manufacturer, if present
+        if self.manufacturer:
+            manufacturer = Organization.construct(
+                resourceType="Organization",
+                id="organization1",
+                name=self.manufacturer
+            )
+            medication.contained = [manufacturer]
+
+        # Add ingredients, if present
+        if self.ingredients:
+            medication.ingredient = [
+                {
+                    "item": CodeableReference.construct(
+                        concept=CodeableConcept.construct(text=ingredient["item"])
+                    ),
+                    "strengthRatio": Ratio.construct(
+                        numerator=Quantity.construct(
+                            value=float(ingredient["quantity"].split()[0]),
+                            code=ingredient["quantity"].split()[1],
+                        )
+                    ),
+                }
+                for ingredient in self.ingredients
+            ]
+
+        # Convert to JSON dictionary
+        return medication.json()
+
+    def create_fhir_inFilesystem(self, filepath, patient_folder):
+    # Create FHIR Medication resource
         medication_resource = Medication(
             identifier=[
                 {"system": "http://example.org/fhir/identifier", "value": self.identifier}
@@ -88,52 +129,15 @@ class MedicationData:
             ] if self.ingredients else None,
         )
 
-        return medication_resource.json(indent=4)
+        # Create the file path
+        filename = self.name.replace(" ", "_") + "_" + str(self.identifier.replace(".", ""))
+        patient_filename = self.patient_name.replace(" ", "_") + "_" + str(self.patient_id)
+        medication_fhire_resource = f"medication_{filename}_{patient_filename}.json"
+        full_path = os.path.join(filepath, medication_fhire_resource)
 
-
-def create_fhir_inFilesystem(self, filepath, patient_folder):
-    # Create FHIR Medication resource
-    medication_resource = Medication(
-        identifier=[
-            {"system": "http://example.org/fhir/identifier", "value": self.identifier}
-        ] if self.identifier else None,
-        code=CodeableConcept(
-            text=self.name
-        ) if self.name else None,
-        doseForm=CodeableConcept(
-            coding=[{"display": self.dose_form}]
-        ) if self.dose_form else None,
-        contained=[
-            Organization(
-                id="organization1",
-                name=self.manufacturer
-            )
-        ] if self.manufacturer else None,
-        ingredient=[
-            {
-                "item": {"concept": CodeableConcept(
-                    text=ingredient["item"]
-                )} if ingredient["item"] else None,
-                "strengthRatio": Ratio(
-                    numerator=Quantity(
-                        value=float(ingredient["quantity"].split(" ")[0]),
-                        code=ingredient["quantity"].split(" ")[1],
-                    )
-                ) if ingredient["quantity"] else None,
-            }
-            for ingredient in self.ingredients
-        ] if self.ingredients else None,
-    )
-
-    # Create the file path
-    filename = self.name.replace(" ", "_") + "_" + str(self.identifier.replace(".", ""))
-    patient_filename = self.patient_name.replace(" ", "_") + "_" + str(self.patient_id)
-    medication_fhire_resource = f"medication_{filename}_{patient_filename}.json"
-    full_path = os.path.join(filepath, medication_fhire_resource)
-
-    # Serialize the resource to JSON
-    with open(full_path, "w") as file:
-        file.write(medication_resource.json(indent=4))
+        # Serialize the resource to JSON
+        with open(full_path, "w") as file:
+            file.write(medication_resource.json(indent=4))
 
 
 

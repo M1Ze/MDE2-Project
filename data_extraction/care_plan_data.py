@@ -68,7 +68,7 @@ class CarePlanData:
             activity=[
                 {"detail": {"description": activity}} for activity in self.activities
             ] if self.activities else None,
-            subject={"reference": f"Patient/{self.patient_id}"}  # Add subject field
+            subject={"reference": f"Patient/{self.identifier}"}  # Add subject field
         )
 
         # Return the serialized JSON representation
