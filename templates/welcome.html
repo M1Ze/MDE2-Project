@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 
+{% block title %}Page Title{% endblock %}
+
 {% block content %}
 <h1 class="text-center">Welcome</h1>
 <div class="text-center">
-    <a href="{{ url_for('new_user') }}" class="btn btn-primary">Create New User</a>
+    <a href="{{ url_for('register_new_user') }}" class="btn btn-primary">Create New User</a>
     <a href="#" class="btn btn-secondary">Update Existing User</a>
 </div>
 {% endblock %}

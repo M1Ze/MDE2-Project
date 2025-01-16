@@ -1,3 +1,4 @@
+#app.py
 from flask import Flask, render_template
 from db_models import db, Patient, HealthData, User
 from data_extraction.patient_data import PatientData
@@ -18,10 +19,9 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-
 @app.route('/')
 def index():
-    render_template('index.html')
+   return render_template('welcome.html')
 
 @app.route('/loginPage', methods=['GET'])
 def login_page():
@@ -35,3 +35,4 @@ def setup_new_patient():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    #app.run(host='0.0.0.0', port=8000, debug=True)
