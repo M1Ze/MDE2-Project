@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Registration Complete</h2>
+<form method="POST" onsubmit="return validateForm()">
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" value="{{ email }}" readonly>
+    </div>
+    <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-group">
+            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" oninput="checkPassword()" required>
+            <button type="button" class="btn btn-secondary" onclick="togglePassword('password')">Show</button>
+        </div>
+        <small id="passwordFeedback" class="form-text text-danger" style="display: none;">
+            Please use at least 3 digits and one special character.
+        </small>
+    </div>
+    <div class="mb-3">
+        <label for="confirm_password" class="form-label">Confirm Password</label>
+        <div class="input-group">
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Repeat your password" oninput="checkPasswordMatch()" required>
+            <button type="button" class="btn btn-secondary" onclick="togglePassword('confirm_password')">Show</button>
+        </div>
+        <small id="passwordMatchFeedback" class="form-text text-danger" style="display: none;">
+            Passwords do not match.
+        </small>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Complete Registration</button>
+</form>
+<form action="{{ url_for('generate_fhir_document') }}" method="GET" class="mt-3">
+    <button type="submit" class="btn btn-secondary">View FHIR Document</button>
+</form>
+
+<script>
+    function togglePassword(fieldId) {
+        const input = document.getElementById(fieldId);
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    // Real-time password feedback (ChatGPT)
+    function checkPassword() {
+        const password = document.getElementById('password').value;
+        const feedback = document.getElementById('passwordFeedback');
+
+        const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        const digitRegex = /\d/g;
+
+        if (!specialCharRegex.test(password) || (password.match(digitRegex) || []).length < 3) {
+            feedback.style.display = 'block';
+        } else {
+            feedback.style.display = 'none';
+        }
+    }
+
+    // Real-time password match feedback (GPT)
+    function checkPasswordMatch() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        const matchFeedback = document.getElementById('passwordMatchFeedback');
+
+        if (password !== confirmPassword) {
+            matchFeedback.style.display = 'block';
+        } else {
+            matchFeedback.style.display = 'none';
+        }
+    }
+
+    function validateForm() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+
+        const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        const digitRegex = /\d/g;
+
+        if (!specialCharRegex.test(password) || (password.match(digitRegex) || []).length < 3) {
+            alert('Password must include at least one special character and three digits.');
+            return false;
+        }
+
+        if (password !== confirmPassword) {
+            alert('Passwords do not match.');
+            return false;
+        }
+
+        return true;
+    }
+</script>
+{% endblock %}
