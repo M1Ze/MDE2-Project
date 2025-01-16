@@ -1,6 +1,0 @@
-#create_db.py
-from app import app
-from db_models import db
-
-with app.app_context():
-    db.create_all()

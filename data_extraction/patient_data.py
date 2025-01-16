@@ -1,14 +1,7 @@
-import json
 import os
 from datetime import datetime
 
-from fhir.resources.address import Address
-from fhir.resources.contactpoint import ContactPoint
-from fhir.resources.humanname import HumanName
 from fhir.resources.patient import Patient
-from sqlalchemy.sql.sqltypes import NULLTYPE
-
-from server import json_string
 
 
 class PatientData:
@@ -73,7 +66,6 @@ class PatientData:
 
 
     def create_fhir(self):
-        from datetime import datetime
         from fhir.resources.humanname import HumanName
         from fhir.resources.contactpoint import ContactPoint
         from fhir.resources.address import Address
@@ -125,7 +117,6 @@ class PatientData:
 
 
     def create_fhir_inFilesystem(self, filepath):
-        from datetime import datetime
         from fhir.resources.humanname import HumanName
         from fhir.resources.contactpoint import ContactPoint
         from fhir.resources.address import Address
