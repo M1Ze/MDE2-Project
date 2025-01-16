@@ -73,7 +73,7 @@ class TestFHIRDataClasses(unittest.TestCase):
 
         self.assertTrue(json_string)
         self.assertIn('identifier', json_string)
-        self.assertIn('type', json_string)
+        self.assertIn('code', json_string)
 
     def test_observation_data_extract_data(self):
         observation = ObservationData()
@@ -181,7 +181,7 @@ class TestFHIRDataClasses(unittest.TestCase):
         new_consent.extract_data(None, json_string)
 
         self.assertEqual(new_consent.identifier, "consent-99999")
-        self.assertEqual(new_consent.status, None)
+        self.assertEqual(new_consent.status, 'Draft')
 
     def test_care_plan_data_create_fhir(self):
         careplan = CarePlanData()
@@ -275,7 +275,7 @@ class TestFHIRDataClasses(unittest.TestCase):
         new_allergy.extract_data(None, json_string)
 
         self.assertEqual(new_allergy.identifier, "allergy002")
-        self.assertEqual(new_allergy.criticality, None)
+        self.assertEqual(new_allergy.criticality, "unable-to-assess")
 
 
 if __name__ == "__main__":

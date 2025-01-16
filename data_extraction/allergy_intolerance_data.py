@@ -14,21 +14,23 @@ from fhir.resources.reference import Reference
 
 class AllergyIntoleranceData:
     def __init__(self):
-        self.identifier = ""
-        self.clinical_status = ""
-        self.verification_status = ""
-        self.allergy_type = ""
-        self.category = ""
-        self.criticality = ""
-        self.code = ""  # Description of the allergen (e.g., "Cashew nuts")
-        self.onset_datetime = ""
-        self.recorded_date = ""
+        self.identifier = None
+        self.clinical_status = None
+        self.verification_status = None
+        self.allergy_type = None
+        self.category = None
+        self.criticality = None
+        self.code = None  # Description of the allergen (e.g., "Cashew nuts")
+        self.onset_datetime = None
+        self.recorded_date = None
         self.reactions = []  # List of reactions (e.g., symptoms)
-        self.patient_id = ""  # Patient ID to link the medication
-        self.patient_name = ""  # Patient Name for display purposes
+        self.patient_id = None  # Patient ID to link the medication
+        self.patient_name = None  # Patient Name for display purposes
 
     def extract_data(self, filepath, json_string):
+
         # Read JSON file and parse it into an FHIR resource
+
         if filepath is not None:
             with open(filepath, "r") as file:
                 json_string = file.read()
@@ -70,16 +72,26 @@ class AllergyIntoleranceData:
         # Valid criticality values according to FHIR specification
         VALID_CRITICALITY_VALUES = ["low", "high", "unable-to-assess"]
 
-        # Validate the criticality field
-        criticality_value = self.criticality.lower() if self.criticality else None
-        if criticality_value not in VALID_CRITICALITY_VALUES:
-            raise ValueError(
-                f"Invalid criticality value. Must be one of {VALID_CRITICALITY_VALUES}, but got '{self.criticality}'"
-            )
+        # Validate the criticality field and provide a default value if missing
+        if self.criticality:
+            criticality_value = self.criticality.lower()
+            if criticality_value not in VALID_CRITICALITY_VALUES:
+                raise ValueError(
+                    f"Invalid criticality value. Must be one of {VALID_CRITICALITY_VALUES}, but got '{self.criticality}'"
+                )
+        else:
+            # Default value if criticality is not provided
+            criticality_value = "unable-to-assess"
+
+        # Ensure a proper fallback value for the "display" attribute of the patient reference
+        if not self.patient_name or not isinstance(self.patient_name, str) or self.patient_name.strip() == "":
+            patient_name_display = "Unknown Patient"
+        else:
+            patient_name_display = self.patient_name.strip()
 
         # Create the FHIR AllergyIntolerance resource
         allergy_resource = AllergyIntolerance(
-            id=f"allergy-{self.code.replace(' ', '-')}",  # Replace invalid characters
+            id=f"allergy-{self.code.replace(' ', '-')}" if self.code else None,  # Replace invalid characters
             identifier=[
                 {"system": "http://example.org/fhir/identifier", "value": self.identifier}
             ] if self.identifier else None,
@@ -108,7 +120,7 @@ class AllergyIntoleranceData:
                 ]
             ) if self.allergy_type else None,
             category=[self.category] if self.category else None,
-            criticality=criticality_value,  # Use the validated criticality value
+            criticality=criticality_value,  # Use the validated or defaulted criticality value
             code=CodeableConcept(
                 coding=[
                     Coding(system="http://snomed.info/sct", display=self.code)
@@ -122,23 +134,23 @@ class AllergyIntoleranceData:
                         coding=[
                             Coding(system="http://snomed.info/sct", display=reaction["substance"])
                         ]
-                    ) if reaction["substance"] else None,
+                    ) if reaction.get("substance") else None,
                     "manifestation": [
                         {"concept": CodeableConcept(
                             coding=[
                                 Coding(system="http://snomed.info/sct", display=manifestation)
                             ]
                         )}
-                        for manifestation in reaction["manifestations"]
-                    ] if reaction["manifestations"] else None,
-                    "severity": reaction["severity"],
-                    "description": reaction["description"],
+                        for manifestation in reaction.get("manifestations", [])
+                    ],
+                    "severity": reaction.get("severity"),
+                    "description": reaction.get("description"),
                 }
                 for reaction in self.reactions
             ] if self.reactions else None,
             patient=Reference(
-                reference=f"Patient/{self.patient_id}",
-                display=self.patient_name,
+                reference=f"Patient/{self.patient_id}" if self.patient_id else None,
+                display=patient_name_display,  # Use validated display value
             ),
         )
 

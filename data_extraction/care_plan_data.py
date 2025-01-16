@@ -49,13 +49,19 @@ class CarePlanData:
                 )
 
     def create_fhir(self):
+        # Validation: Assign default values for mandatory fields if not specified
+        if not self.status:
+            self.status = "active"  # Default FHIR status
+        if not self.intent:
+            self.intent = "plan"  # Default FHIR intent (e.g., 'plan', 'proposal', or 'order')
+
         # Create the FHIR CarePlan resource
         care_plan_resource = CarePlan(
             identifier=[
                 {"system": "http://example.org/fhir/identifier", "value": self.identifier}
             ] if self.identifier else None,
-            status=self.status if self.status else None,
-            intent=self.intent if self.intent else None,
+            status=self.status,
+            intent=self.intent,
             title=self.title if self.title else None,
             period=Period(
                 start=self.period_start if self.period_start else None,
@@ -73,6 +79,8 @@ class CarePlanData:
 
         # Return the serialized JSON representation
         return care_plan_resource.json(indent=4)
+
+
 
     def create_fhir_inFilesystem(self, filepath, patient_folder):
         # Create the folder path for the care plan

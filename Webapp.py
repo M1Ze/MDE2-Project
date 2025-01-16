@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
-from fhir_generator import FHIRDocumentGenerator
+#from fhir_generator import FHIRDocumentGenerator
 
 app = Flask(__name__)
 

@@ -1,3 +1,4 @@
+import json
 import os
 
 from fhir.resources.medication import Medication
@@ -18,6 +19,14 @@ class MedicationData:
         self.patient_name = ""  # Patient Name for display purposes
 
     def extract_data(self, filepath, json_string):
+
+        data = json.loads(json_string)  # Example for explanation
+        self.identifier = data.get('identifier', None)
+        self.name = data.get('name', None)
+        self.dose_form = data.get('dose_form', None)
+        self.manufacturer = data.get('manufacturer') or None  # Ensure None if missing
+        self.ingredients = data.get('ingredients', [])
+
         # Read JSON file and parse it into a FHIR Medication resource
         if filepath is not None:
             with open(filepath, "r") as file:
@@ -33,8 +42,11 @@ class MedicationData:
 
         self.name = medication.code.text if medication.code and medication.code.text else None
 
-        self.dose_form = medication.doseForm.coding[
-            0].display if medication.doseForm and medication.doseForm.coding else None
+        # Handle doseForm
+        self.dose_form = None
+        if medication.doseForm and medication.doseForm.coding:
+            coding = medication.doseForm.coding[0]
+            self.dose_form = coding.display if coding.display else None
 
         # Extract manufacturer from 'contained'
         if medication.contained:
@@ -61,9 +73,11 @@ class MedicationData:
             identifier=[{
                 "system": "http://example.org/fhir/identifier",
                 "value": self.identifier
-            }],
-            code=CodeableConcept.construct(text=self.name),
-            doseForm=CodeableConcept.construct(coding=[{"display": self.dose_form}]),
+            }] if self.identifier else None,
+            code=CodeableConcept.construct(text=self.name) if self.name else None,
+            doseForm=CodeableConcept.construct(
+                coding=[{"display": self.dose_form}] if self.dose_form else []
+            ) if self.dose_form else None,
         )
 
         # Add manufacturer, if present
@@ -87,13 +101,15 @@ class MedicationData:
                             value=float(ingredient["quantity"].split()[0]),
                             code=ingredient["quantity"].split()[1],
                         )
-                    ),
+                    ) if "quantity" in ingredient and ingredient["quantity"] else None,
                 }
                 for ingredient in self.ingredients
             ]
 
         # Convert to JSON dictionary
         return medication.json()
+
+
 
     def create_fhir_inFilesystem(self, filepath, patient_folder):
     # Create FHIR Medication resource
