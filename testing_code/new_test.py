@@ -46,6 +46,12 @@ def test_observation_data():
     print(new_observation.identifier)
     print(new_observation.type)
 
+def test_observation_data_file():
+    new_observation = ObservationData()
+    new_observation.extract_data("../fhir_resources/observation_example_1.json", None)
+
+    print(new_observation.data)
+    print(new_observation.type)
 
 def test_medication_data():
     # Define test data
@@ -131,11 +137,12 @@ def test_allergy_data():
 
 
 if __name__ == "__main__":
+    test_observation_data_file()
+    # test_patient_data()
+    # test_observation_data()
+    # test_medication_data()
+    # test_consent_data()
+    # test_care_plan_data()
+    # test_allergy_data()
 
-    test_patient_data()
-    test_observation_data()
-    test_medication_data()
-    test_consent_data()
-    test_care_plan_data()
-    test_allergy_data()
 
