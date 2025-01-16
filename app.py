@@ -15,7 +15,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
-
 with app.app_context():
     db.create_all()
 
@@ -27,6 +26,12 @@ def index():
 @app.route('/loginPage', methods=['GET'])
 def login_page():
     return render_template('loginPage.html')
+@app.route('/registerNewUser', methods=['GET', 'POST'])
+def register_new_user():
+    return render_template('register.html')
+@app.route('/setupNewPatient', methods=['GET', 'POST'])
+def setup_new_patient():
+    render_template('new_user.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

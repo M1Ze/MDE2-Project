@@ -79,7 +79,7 @@ def registration_complete():
 
         return jsonify(fhir_document)
 
-    return render_template("registration_complete.html", email=user_data.get("email", ""))
+    return render_template("register.html", email=user_data.get("email", ""))
 
 @app.route("/generate_fhir_document", methods=["GET"])
 def generate_fhir_document():
