@@ -33,18 +33,23 @@ class PatientData:
         self.gender = patient.gender if patient.gender else None
         self.address = (
             ", ".join(filter(
-                None, patient.address[0].line + [patient.address[0].city, patient.address[0].state, patient.address[0].postalCode]))
+                None, patient.address[0].line + [patient.address[0].city,
+                                                 patient.address[0].state,
+                                                 patient.address[0].postalCode]))
             if patient.address else None
         )
-        self.phone = next(
-            (telecom.value for telecom in patient.telecom if telecom.system == "phone"), None
+        self.phone = (
+            next((telecom.value for telecom in patient.telecom if telecom.system == "phone"), None)
+            if patient.telecom else None
         )
-        self.email = next(
-            (telecom.value for telecom in patient.telecom if telecom.system == "email"), None
+        self.email = (
+            next((telecom.value for telecom in patient.telecom if telecom.system == "email"), None)
+            if patient.telecom else None
         )
-        self.identifier = next(
-            (identifier.value for identifier in patient.identifier), None
-        ) if patient.identifier else None
+        self.identifier = (
+            next((identifier.value for identifier in patient.identifier), None)
+            if patient.identifier else None
+        )
         self.native_language = (
             patient.communication[0].language.coding[0].display
             if patient.communication else None
@@ -61,14 +66,28 @@ class PatientData:
                 contact_phone = next(
                     (telecom.value for telecom in contact.telecom if telecom.system == "phone"),
                     None,
-                )
+                ) if contact.telecom else None
                 self.contacts.append({"name": contact_name, "phone": contact_phone})
-
 
     def create_fhir(self):
         from fhir.resources.humanname import HumanName
         from fhir.resources.contactpoint import ContactPoint
         from fhir.resources.address import Address
+
+        # Safely format birthdate
+        formatted_birthdate = None
+        if self.birthdate:
+            try:
+                formatted_birthdate = self.format_birthdate(self.birthdate)
+            except ValueError as ex:
+                print(f"Warning: Birthdate could not be formatted. Reason: {ex}")
+
+        # Create the telecom list, filtering out None values
+        telecom = []
+        if self.phone:
+            telecom.append(ContactPoint(system="phone", value=self.phone, use="home"))
+        if self.email:
+            telecom.append(ContactPoint(system="email", value=self.email, use="home"))
 
         # Create the FHIR Patient resource
         patient_resource = Patient(
@@ -78,7 +97,7 @@ class PatientData:
             name=[
                 HumanName(family=self.name.split(" ")[-1], given=self.name.split(" ")[:-1])
             ] if self.name else None,
-            birthDate=self.format_birthdate(self.birthdate),
+            birthDate=formatted_birthdate,  # Use safely formatted birthdate
             gender=self.gender if self.gender else None,
             address=[
                 Address(
@@ -88,14 +107,7 @@ class PatientData:
                     postalCode=self.address.split(", ")[3] if len(self.address.split(", ")) > 3 else None,
                 )
             ] if self.address else None,
-            telecom=[
-                ContactPoint(system="phone", value=self.phone, use="home")
-                if self.phone
-                else None,
-                ContactPoint(system="email", value=self.email, use="home")
-                if self.email
-                else None,
-            ],
+            telecom=telecom,  # No None values here
             contact=[
                 {
                     "name": HumanName(
@@ -107,14 +119,9 @@ class PatientData:
                     ],
                 }
                 for contact in self.contacts
-            ]
-            if self.contacts
-            else None,
+            ] if self.contacts else None,
         )
         return patient_resource.json(indent=4)
-
-
-
 
     def create_fhir_inFilesystem(self, filepath):
         from fhir.resources.humanname import HumanName

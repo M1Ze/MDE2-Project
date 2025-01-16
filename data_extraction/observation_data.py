@@ -1,4 +1,9 @@
+import datetime
+import json
 import os
+
+from fhir.resources.coding import Coding
+from fhir.resources.identifier import Identifier
 from fhir.resources.observation import Observation
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.quantity import Quantity
@@ -10,67 +15,109 @@ class ObservationData:
         self.data_aqu_datetime = ""
         self.data = "" # String with value + unit
 
+
     def extract_data(self, filepath, json_string):
-        # json file einlesen um FHIR ressource draus zu machen
+        # Parse the JSON string or load it from the file to create an Observation object
         if filepath is not None:
             with open(filepath, "r") as file:
                 json_string = file.read()
-            observation = Observation.parse_raw(json_string)
-        else:
-            observation = Observation.parse_raw(json_string)
 
-        self.identifier = next(
-            (identifier.value for identifier in observation.identifier), None
-        ) if observation.identifier else None
+        observation = Observation.parse_raw(json_string)
 
-        self.type = observation.code.coding[0].display if observation.code else None
+        # Extract identifier
+        self.identifier = (
+            next((identifier.value for identifier in observation.identifier), None)
+            if observation.identifier
+            else None
+        )
 
+        # Extract type from Observation.code (FHIR standard)
+        self.type = observation.code.text if observation.code else None
+
+        # Extract the observation's effective date and time
         self.data_aqu_datetime = observation.effectiveDateTime if observation.effectiveDateTime else None
 
-        if hasattr(observation, "valueQuantity") and observation.valueQuantity:
+        # Extract value from the Observation.resource, e.g., valueQuantity, valueString, etc.
+        if observation.valueQuantity:
             self.data = f"{observation.valueQuantity.value} {observation.valueQuantity.unit}"
-        elif hasattr(observation, "valueCodeableConcept") and observation.valueCodeableConcept:
-            self.data = (
-                observation.valueCodeableConcept.text
-                if observation.valueCodeableConcept.text
-                else observation.valueCodeableConcept.coding[0].display
-                if observation.valueCodeableConcept.coding
-                else None
-            )
-        elif hasattr(observation, "valueString") and observation.valueString:
+        elif observation.valueCodeableConcept and observation.valueCodeableConcept.text:
+            self.data = observation.valueCodeableConcept.text
+        elif observation.valueCodeableConcept and observation.valueCodeableConcept.coding:
+            self.data = observation.valueCodeableConcept.coding[0].display
+        elif observation.valueString:
             self.data = observation.valueString
-        elif hasattr(observation, "valueBoolean") and observation.valueBoolean is not None:
+        elif observation.valueBoolean is not None:
             self.data = str(observation.valueBoolean)  # Convert boolean to string
-        elif hasattr(observation, "valueInteger") and observation.valueInteger is not None:
+        elif observation.valueInteger is not None:
             self.data = str(observation.valueInteger)  # Convert integer to string
         else:
             self.data = None
 
     def create_fhir(self):
-        import os
-        from fhir.resources.observation import Observation
-        from fhir.resources.codeableconcept import CodeableConcept
-        from fhir.resources.quantity import Quantity
+        # Validate 'self.type' and use a default value if invalid
+        if not self.type or not isinstance(self.type, str) or self.type.strip() == "":
+            self.type = "Unknown Type"  # Setting a default value for 'type'
 
-        # Create FHIR Observation resource
-        observation_resource = Observation(
-            identifier=[
-                {"system": "http://example.org/fhir/identifier", "value": self.identifier}
-            ] if self.identifier else None,
-            status="final",  # Assuming "final" for this example
-            code=CodeableConcept(
-                coding=[{"display": self.type}]
-            ) if self.type else None,
-            subject={"reference": f"Patient/{self.patient_id}"} if self.patient_id else None,
-            effectiveDateTime=self.data_aqu_datetime if self.data_aqu_datetime else None,
-            valueQuantity=Quantity(
-                value=float(self.data.split(" ")[0]),
-                unit=self.data.split(" ")[1]
-            ) if self.data and " " in self.data else None,
-            valueString=self.data if self.data and not " " in self.data else None
+        # Create an Identifier object
+        identifier = Identifier(
+            system="http://example.org/fhir/identifier",
+            value=self.identifier
         )
 
+        # Create a CodeableConcept for the 'code' field
+        codeable_concept = CodeableConcept(
+            text=self.type,
+            coding=[Coding(display=self.type)]  # Coding.display expects a valid non-empty string
+        )
+
+        # Handle empty or invalid 'self.data'
+        data_value = self._parse_value()
+        data_unit = self._parse_unit()
+
+        value_quantity = None  # Initialize as None
+        if data_value is not None and data_unit is not None:
+            # Create a Quantity object for valueQuantity
+            value_quantity = Quantity(
+                value=data_value,
+                unit=data_unit
+            )
+
+        # Validate or transform effectiveDateTime into a valid ISO-8601 datetime
+        if self.data_aqu_datetime:
+            try:
+                # Try to parse the datetime to ensure it's valid
+                datetime.datetime.fromisoformat(self.data_aqu_datetime.replace("Z", "+00:00"))
+            except ValueError:
+                # If invalid, set it to a default value
+                self.data_aqu_datetime = datetime.datetime.now().isoformat()
+        else:
+            # Assign a default value if no datetime is provided
+            self.data_aqu_datetime = None
+
+        # Using the fhir.resources Observation function
+        observation_resource = Observation(
+            resourceType="Observation",
+            identifier=[identifier],
+            status="final",
+            code=codeable_concept,
+            effectiveDateTime=self.data_aqu_datetime,
+            valueQuantity=value_quantity  # Include only if valueQuantity is not None
+        )
+
+        # Return the JSON-encoded FHIR Observation resource
         return observation_resource.json(indent=4)
+
+    def _parse_value(self):
+        # Parse the numerical value from the 'data' field (e.g., "120 mmHg").
+        if self.data and isinstance(self.data, str) and ' ' in self.data:
+            return float(self.data.split()[0])
+        return None
+
+    def _parse_unit(self):
+        # Parse the unit from the 'data' field (e.g., "120 mmHg").
+        if self.data and isinstance(self.data, str) and ' ' in self.data:
+            return self.data.split()[1]
+        return None
 
     def create_fhir_inFilesystem(self, filepath, patient_folder):
 

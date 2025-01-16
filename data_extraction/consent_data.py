@@ -47,7 +47,7 @@ class ConsentData:
                     "value": self.identifier,
                 }
             ] if self.identifier else None,
-            status=self.status if self.status else "active",
+            status=self.status if self.status else 'Draft', #default
             category=[
                 CodeableConcept(
                     coding=[{"code": "dnr", "display": "Do Not Resuscitate"}]
