@@ -1,70 +1,43 @@
-/* style.css*/
-/* Allgemeine Stile */
+/* style.css */
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #f4f4f9; /* Helles Grau für augenfreundlichen Hintergrund */
-    color: #333; /* Dunkles Grau für Text */
+    background-color: #f9f9f9;
+    color: #333;
     margin: 0;
     padding: 0;
 }
 
-.container {
-    max-width: 900px;
-    margin: 20px auto;
-    background-color: #fff; /* Weißer Hintergrund für Inhalte */
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-}
-
-/* Header */
 h2 {
-    font-size: 2rem;
-    color: #00509e; /* Dezentes Blau */
-    text-align: center;
-    margin-bottom: 20px;
+    font-size: 1.75rem;
+    color: #00509e;
 }
 
-/* Labels und Inputs */
-label {
-    font-weight: bold;
-    color: #00509e; /* Gleiche Farbe wie der Titel für Konsistenz */
+form {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-input, select, textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
+input {
     border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-    background-color: #f9f9f9;
-    transition: border-color 0.2s ease-in-out;
+    border-radius: 4px;
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 10px;
 }
 
-input:focus, select:focus, textarea:focus {
-    border-color: #00509e;
-    outline: none;
-    background-color: #eef7ff;
-}
-
-textarea {
-    resize: vertical; /* Nur vertikale Größenanpassung erlauben */
-}
-
-/* Buttons */
 button {
     font-size: 1rem;
-    padding: 10px 20px;
+    padding: 10px;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
 }
 
 button.btn-primary {
-    background-color: #00509e; /* Blau für Hauptaktionen */
-    color: white;
+    background-color: #00509e;
+    color: #fff;
 }
 
 button.btn-primary:hover {
@@ -72,97 +45,9 @@ button.btn-primary:hover {
 }
 
 button.btn-secondary {
-    background-color: #e0e0e0; /* Helles Grau für Sekundäraktionen */
-    color: #333;
+    border-radius: 0 4px 4px 0;
 }
 
-button.btn-secondary:hover {
-    background-color: #c0c0c0;
-}
-
-button.btn-danger {
-    background-color: #d9534f; /* Rot für Löschen (zugänglich für Rot-Grün-Schwache) */
-    color: white;
-}
-
-button.btn-danger:hover {
-    background-color: #c9302c;
-}
-
-/* Fehlermeldungen */
-.form-text.text-danger {
-    color: #d9534f; /* Alternativer Rotton */
-    font-weight: bold;
-}
-
-/* Platzhalter */
-::placeholder {
-    color: #aaa; /* Dezentes Grau */
-    font-style: italic;
-}
-
-/* Dropdown-Menüs */
-select {
-    appearance: none; /* Entfernt Standard-Dropdown-Stil */
-    background-color: #f9f9f9;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23333'%3E%3Cpath d='M6 8l4 4 4-4H6z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 15px;
-}
-
-/* Barrierefreiheit */
-a, button {
-    outline: none;
-}
-
-a:focus, button:focus {
-    outline: 2px solid #00509e; /* Fokus-Indikator für Tastaturnavigation */
-    outline-offset: 2px;
-}
-
-/* Formular-Gruppen */
-.form-group {
-    margin-bottom: 15px;
-}
-
-/* Tabellen (falls verwendet) */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-}
-
-th, td {
-    padding: 10px;
-    text-align: left;
-    border: 1px solid #ddd;
-}
-
-th {
-    background-color: #00509e;
-    color: white;
-}
-
-tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-/* Fehlermeldungen und Feedback */
-#passwordFeedback, #passwordMatchFeedback {
-    font-size: 0.875rem;
-    margin-top: -10px;
-    margin-bottom: 10px;
-}
-
-/* Responsives Design */
-@media (max-width: 768px) {
-    .container {
-        padding: 15px;
-    }
-
-    button {
-        width: 100%; /* Buttons nehmen die volle Breite ein */
-        margin-bottom: 10px; /* Abstand zwischen Buttons */
-    }
+.offcanvas-body .navbar-nav {
+    justify-content: flex-start !important; /* Align items to the left */
 }

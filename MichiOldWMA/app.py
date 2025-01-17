@@ -139,14 +139,14 @@ def index():
     return render_template('index.html')
 @app.route('/loginPage', methods=['GET'])
 def login_page():
-    return render_template('loginPage.html')
+    return render_template('old_templates/../templates/loginPage.html')
 @app.route('/appointmentsDefault', methods=['GET'])
 def appointments_default():
     return render_template('appointmentsDefault.html')
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
-        return render_template('register.html')
+        return render_template('old_templates/../templates/register.html')
 
     if request.method == 'POST':
         data = request.get_json()

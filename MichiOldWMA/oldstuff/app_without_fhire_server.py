@@ -133,7 +133,7 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
-        return render_template('register.html')
+        return render_template('old_templates/../../templates/register.html')
 
     if request.method == 'POST':
         data = request.get_json()
@@ -172,7 +172,7 @@ def register():
 
 @app.route('/loginPage', methods=['GET'])
 def login_page():
-    return render_template('loginPage.html')
+    return render_template('old_templates/../../templates/loginPage.html')
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json

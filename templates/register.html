@@ -1,28 +1,47 @@
+<!--register.html-->
 {% extends "base.html" %}
 
+{% block title %}Register{% endblock %}
+
 {% block content %}
-<h2>Registration</h2>
-<form method="POST" onsubmit="return validateForm()">
-    <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" name="email" autocomplete="email" value="{{ email }}"
-                      pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" required>
-    </div>
-    <div class="mb-3">
-        <label for="password" class="form-label">Password</label>
-        <div class="input-group">
-            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" oninput="checkPassword()" required>
-            <button type="button" class="btn btn-secondary" onclick="togglePassword('password')">Show</button>
+<!-- Registration Form -->
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Register to setup your D.E.P.S</h1>
+    <form method="POST" action="/register" class="needs-validation row g-3" novalidate>
+
+        <!-- Email and Password -->
+        <div class="col-md-6">
+            <label for="inputEmail4" class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" id="inputEmail4" autocomplete="email"
+                   pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" required>
+            <div class="invalid-feedback">Please enter a valid email address.</div>
+            <div class="valid-feedback">Looks good!</div>
+            <div id="emailHelp" class="form-text">Your information will be handled with care.</div>
         </div>
-        <small id="passwordFeedback" class="form-text text-danger" style="display: none;">
-            Please use at least 3 digits and one special character.
-        </small>
-    </div>
+        <div class="col-md-6">
+            <label for="inputPassword4" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" id="inputPassword4" minlength="8" required>
+            <div class="invalid-feedback">Password must be at least 8 characters long.</div>
+        </div>
 
-    <button type="submit" class="btn btn-primary">Complete Registration</button>
-</form>
-    <button type="submit" class="btn btn-secondary">View FHIR Document</button>
-</form>
+        <!-- First and Last Name -->
+        <div class="col-md-6">
+            <input type="text" class="form-control" name="first_name" placeholder="First name" aria-label="First name"
+                   required>
+            <div class="invalid-feedback">Please provide your first name.</div>
+        </div>
+        <div class="col-md-6">
+            <input type="text" class="form-control" name="last_name" placeholder="Last name" aria-label="Last name"
+                   required>
+            <div class="invalid-feedback">Please provide your last name.</div>
+        </div>
 
-<script src="{{ url_for('static', filename='JS/register.js') }}"></script>
+        <!-- Submit -->
+        <div class="col-12">
+            <button type="submit" class="btn btn-custom w-100">Register</button>
+        </div>
+    </form>
+</div>
+<script src="/static/JS/register.js" defer></script>
 {% endblock %}
+

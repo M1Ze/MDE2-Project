@@ -137,12 +137,12 @@ def test_allergy_data():
 
 
 if __name__ == "__main__":
-    test_observation_data_file()
+    #test_observation_data_file()
     test_medication_data()
     # test_patient_data()
     # test_observation_data()
     # test_medication_data()
-    # test_consent_data()
+    test_consent_data()
     # test_care_plan_data()
     # test_allergy_data()
 
