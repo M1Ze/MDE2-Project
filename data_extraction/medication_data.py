@@ -1,6 +1,8 @@
 import json
 import os
 
+from fhir.resources.coding import Coding
+from fhir.resources.identifier import Identifier
 from fhir.resources.medication import Medication
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.organization import Organization
@@ -51,7 +53,7 @@ class MedicationData:
         # Extract manufacturer from 'contained'
         if medication.contained:
             for contained in medication.contained:
-                if contained.resource_type == "Organization":
+                if contained.__resource_type__ == "Organization":
                     self.manufacturer = contained.name if hasattr(contained, "name") else None
                     break
 
@@ -70,13 +72,20 @@ class MedicationData:
         # Create the base Medication resource
         medication = Medication.construct(
             resourceType="Medication",
-            identifier=[{
-                "system": "http://example.org/fhir/identifier",
-                "value": self.identifier
-            }] if self.identifier else None,
+            identifier=[
+                Identifier.construct(
+                    system="http://example.org/fhir/identifier",
+                    value=self.identifier
+                )
+            ] if self.identifier else None,
             code=CodeableConcept.construct(text=self.name) if self.name else None,
-            doseForm=CodeableConcept.construct(
-                coding=[{"display": self.dose_form}] if self.dose_form else []
+            dose_form=CodeableConcept.construct(
+                coding=[
+                    Coding.construct(
+                        system="http://terminology.hl7.org/CodeSystem/dose-form",  # Optional FHIR system for dose forms
+                        display=self.dose_form  # Use the human-readable dose form (e.g., "Tablet")
+                    )
+                ]
             ) if self.dose_form else None,
         )
 
