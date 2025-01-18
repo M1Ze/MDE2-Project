@@ -27,7 +27,7 @@ with app.app_context():
 
     try:
         # Add user
-        user = User(username="John@doe.com", password="12345678", role="User")
+        user = User(email="John@doe.com", password="12345678", role="User")
         db.session.add(user)
         db.session.commit()  # Commit to generate the user.id
 

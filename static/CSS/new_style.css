@@ -1,0 +1,97 @@
+/*new_style.css*/
+/* Custom Navbar Background */
+.custom-navbar {
+    background-color: #1A3F47; /* Custom navbar color */
+}
+
+/* Navbar Links and Brand Text */
+.custom-navbar .nav-link,
+.custom-navbar .navbar-brand {
+    color: white !important; /* Make text white */
+    font-size: 1.5rem; /* Default font size for navbar links */
+}
+
+/* Navbar Link Hover Effect */
+.custom-navbar .nav-link:hover {
+    text-decoration: underline; /* Optional hover effect */
+}
+
+/* Centered Logo Styling */
+.custom-navbar .navbar-brand {
+    position: absolute; /* Keeps the logo in the center */
+    left: 50%;          /* Aligns it horizontally to the middle */
+    transform: translateX(-50%); /* Centers it perfectly */
+    z-index: 1;         /* Ensures it stays on top of collapsible content */
+    padding: 0 20px;    /* Adds spacing around the logo */
+    font-size: 2.5rem;  /* Larger logo text size */
+    white-space: nowrap; /* Prevents text wrapping */
+}
+
+/* Navbar Toggler (Hamburger Menu) */
+.navbar-toggler {
+    border-color: white; /* Change border of the toggle button to white */
+}
+
+/* Toggler Icon (Hamburger Lines in White) */
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=UTF8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba(255, 255, 255, 1)' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+/* Responsive Font Size for Navbar */
+@media (max-width: 992px) { /* Medium screens */
+    .custom-navbar .navbar-brand {
+        font-size: 2.3rem; /* Reduce logo size slightly */
+    }
+
+    .custom-navbar .nav-link {
+        font-size: 1.4rem; /* Larger text for links */
+    }
+}
+
+@media (max-width: 768px) { /* Small screens */
+    .custom-navbar .navbar-brand {
+        font-size: 2rem; /* Reduce logo size further */
+    }
+
+    .custom-navbar .nav-link {
+        font-size: 1.2rem; /* Smaller link text */
+    }
+}
+
+@media (max-width: 576px) { /* Extra small screens */
+    .custom-navbar .navbar-brand {
+        font-size: 1.8rem; /* Further reduce logo text */
+    }
+
+    .custom-navbar .nav-link {
+        font-size: 1rem; /* Smaller link text */
+    }
+}
+/* Custom Button */
+.btn-custom {
+    background-color: #1A3F47; /* Match the navbar color */
+    color: white; /* Make text white */
+    border: none; /* Remove border */
+}
+
+.btn-custom:hover {
+    background-color: #164044; /* Slightly darker shade for hover effect */
+    color: white; /* Keep text white on hover */
+}
+
+
+/*.navbar-brand {*/
+/*    font-size: 3rem;*/
+/*    border: 7px solid #0d6efd;*/
+/*    border-radius: 15px;*/
+/*    padding: 10px;*/
+/*    white-space: nowrap; !* Prevent wrapping *!*/
+/*}*/
+
+/*@media (max-width: 576px) {*/
+/*    !* Adjust for smaller devices *!*/
+/*    .navbar-brand {*/
+/*        content: "D.E.P.S.";*/
+/*        font-size: 2rem;*/
+/*    }*/
+/*}*/

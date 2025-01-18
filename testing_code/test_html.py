@@ -9,7 +9,7 @@ medical_data = {}
 
 @app.route("/")
 def welcome():
-    return render_template("welcome.html")
+    return render_template("old_templates/welcome.html")
 
 
 @app.route("/new_user", methods=["GET", "POST"])
@@ -35,7 +35,7 @@ def new_user():
         ]
 
         return redirect(url_for("medical_info"))
-    return render_template("new_user.html")
+    return render_template("old_templates/new_user.html")
 
 
 @app.route("/medical_info", methods=["GET", "POST"])
@@ -56,7 +56,7 @@ def medical_info():
         medical_data["dnr"] = request.form["dnr"]
 
         return redirect(url_for("registration_complete"))
-    return render_template("medical_info.html", gender=user_data.get("gender", ""))
+    return render_template("old_templates/medical_info.html", gender=user_data.get("gender", ""))
 
 
 @app.route("/registration_complete", methods=["GET", "POST"])
@@ -79,7 +79,7 @@ def registration_complete():
 
         return jsonify(fhir_document)
 
-    return render_template("register.html", email=user_data.get("email", ""))
+    return render_template("old_templates/../templates/register.html", email=user_data.get("email", ""))
 
 @app.route("/generate_fhir_document", methods=["GET"])
 def generate_fhir_document():
