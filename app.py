@@ -120,7 +120,7 @@ def login():
         return jsonify(
             {'status': 'success', 'message': 'Login successful', 'token': token})  # opt. add user_id': user.id ,
 
-@app.route('/checklogin', methods=['GET'])
+@app.route('/checklogin', methods=['GET', 'POST'])
 def checklogin():
     auth_header = request.headers.get('Authorization')
     if not auth_header or not auth_header.startswith("Bearer "):
@@ -136,6 +136,40 @@ def checklogin():
 
     # Return success response for valid token
     return jsonify({'status': 'success', 'user_id': token_check['user_id']}), 200
+
+
+@app.route('/getPatientInformation', methods=['GET'])
+def get_patient_information():
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({'status': 'error', 'message': 'No token provided'}), 401
+
+    token = auth_header.split(" ")[1]
+    token_check = check_token(token)  # Your token validation logic
+    if not token_check or 'user_id' not in token_check:
+        return jsonify({'status': 'error', 'message': 'Invalid token'}), 401
+
+    user_id = token_check['user_id']
+    patient = Patient.query.filter_by(user_id=user_id).first()
+    if not patient:
+        return jsonify({'status': 'error', 'message': 'Patient not found'}), 404
+
+    # Serialize the patient data for the frontend
+    patient_data = {
+        'given_name': patient.name.split(" ")[0],
+        'last_name': patient.name.split(" ")[1],
+        # 'gender': patient.gender,
+        # 'birthday': patient.birthday.isoformat() if patient.birthday else None,
+        # 'countryCode': patient.country_code,
+        # 'phonenumber': patient.phone_number,
+        # 'address': patient.address,
+        # 'zip': patient.zip,
+        # 'city': patient.city,
+        # 'state': patient.state,
+    }
+    print(patient_data)
+    return jsonify({'status': 'success', 'patient': patient_data})
+
 
 
 if __name__ == '__main__':
