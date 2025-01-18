@@ -7,9 +7,9 @@ db = SQLAlchemy()
 class Patient(db.Model):
     __tablename__ = 'patient'
     id = db.Column(db.Integer, primary_key=True)
-    identifier = db.Column(db.String(100), unique=True, nullable=False)  # Unique patient identifier (SVN)
+    identifier = db.Column(db.String(100), unique=True, nullable=True)  # Unique patient identifier (SVN)
     name = db.Column(db.String(200), nullable=False)  # Patient's full name
-    pat_data = db.Column(db.Text, nullable=False)  # JSON data for FHIR resource
+    pat_data = db.Column(db.Text, nullable=True)  # JSON data for FHIR resource
     qr_code = db.Column(BLOB, nullable=True)  # Path to the QR code image
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Foreign key to User
 

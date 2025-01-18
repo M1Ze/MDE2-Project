@@ -1,3 +1,4 @@
+// register.js
 (function () {
     'use strict';
 
@@ -74,12 +75,12 @@
     });
 
     function createUserJson() {
-        const givenName = document.querySelector('input[name="first_name"]').value.trim();
+        const givenName = document.querySelector('input[name="given_name"]').value.trim();
         const lastName = document.querySelector('input[name="last_name"]').value.trim();
         const email = document.querySelector('input[name="email"]').value.trim();
 
         return {
-            giveName: givenName,
+            givenName: givenName,
             lastName: lastName,
             email: email,
         };
