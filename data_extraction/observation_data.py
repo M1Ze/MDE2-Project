@@ -10,10 +10,10 @@ from fhir.resources.quantity import Quantity
 
 class ObservationData:
     def __init__(self):
-        self.identifier = ""
-        self.type = "" #Type of observation
-        self.data_aqu_datetime = ""
-        self.data = "" # String with value + unit
+        self.identifier = None
+        self.type = None #Type of observation
+        self.data_aqu_datetime = None
+        self.data = None # String with value + unit
 
 
     def extract_data(self, filepath, json_string):
