@@ -79,6 +79,12 @@
     color: white; /* Keep text white on hover */
 }
 
+/* Increase size of the checkbox */
+.form-check-input-resus {
+    width: 30px;
+    height: 30px;
+}
+
 
 /*.navbar-brand {*/
 /*    font-size: 3rem;*/

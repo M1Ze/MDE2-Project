@@ -206,23 +206,20 @@
                 <div class="me-3">
                     <label>Blood Type:</label>
                     <div class="form-check">
-                        <input class="form-check-input blood-radio" type="radio" name="blood_type" id="blood_a"
-                               value="A" required>
+                        <input class="form-check-input" type="radio" name="blood_type" id="blood_a" value="A" required>
                         <label class="form-check-label" for="blood_a">A</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input blood-radio" type="radio" name="blood_type" id="blood_b"
-                               value="B" required>
+                        <input class="form-check-input" type="radio" name="blood_type" id="blood_b" value="B" required>
                         <label class="form-check-label" for="blood_b">B</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input blood-radio" type="radio" name="blood_type" id="blood_ab"
-                               value="AB" required>
+                        <input class="form-check-input" type="radio" name="blood_type" id="blood_ab" value="AB"
+                               required>
                         <label class="form-check-label" for="blood_ab">AB</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input blood-radio" type="radio" name="blood_type" id="blood_o"
-                               value="O" required>
+                        <input class="form-check-input" type="radio" name="blood_type" id="blood_o" value="O" required>
                         <label class="form-check-label" for="blood_o">O</label>
                     </div>
                 </div>
@@ -230,27 +227,24 @@
                 <div>
                     <label>Rhesus Factor:</label>
                     <div class="form-check">
-                        <input class="form-check-input rhesus-radio" type="radio" name="rhesus_factor" id="rhesus_pos"
-                               value="+" required>
+                        <input class="form-check-input" type="radio" name="rhesus_factor" id="rhesus_pos" value="+"
+                               required>
                         <label class="form-check-label" for="rhesus_pos">Positive (+)</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input rhesus-radio" type="radio" name="rhesus_factor" id="rhesus_neg"
-                               value="-" required>
+                        <input class="form-check-input" type="radio" name="rhesus_factor" id="rhesus_neg" value="-"
+                               required>
                         <label class="form-check-label" for="rhesus_neg">Negative (-)</label>
                     </div>
                 </div>
             </div>
-            <button type="button" class="btn btn-secondary" id="lock-blood-type">Lock</button>
         </div>
-
 
         <!-- Resuscitation Order -->
         <div class="col-md-6 text-center p-3 border rounded">
             <h2 class="text-center mb-4">Resuscitation Order</h2>
             <div class="form-check">
-                <input class="form-check-input-resus" type="checkbox" name="resuscitation" id="dnr-checkbox"
-                       value="DNR">
+                <input class="form-check-input-resus" type="checkbox" name="resuscitation" id="dnr-checkbox" value="DNR">
                 <label class="form-check-label" for="dnr-checkbox">
                     Do Not Resuscitate (DNR) - In case of cardiac arrest, no resuscitation efforts will be made.
                 </label>
@@ -281,8 +275,8 @@
         </div>
 
 
-        <!--Medication-->
         <div class="col-md-6 text-center p-3 border rounded">
+            <!-- Medication Section -->
             <h2 class="text-center mb-4">Medication</h2>
             <div class="p-3 border rounded">
                 <table class="table">
@@ -290,6 +284,7 @@
                     <tr>
                         <th>Manufacturer</th>
                         <th>Medication</th>
+                        <th>Dose</th>
                     </tr>
                     </thead>
                     <tbody id="medication-list">
@@ -298,25 +293,16 @@
                 </table>
                 <h6>Add New Medication</h6>
                 <div class="row g-3 mb-3">
-                    <!-- Manufacturer Dropdown -->
-                    <div class="col-md-6">
-                        <label for="medication_manufacturer" class="form-label">Manufacturer</label>
-                        <select id="medication_manufacturer" name="medication_manufacturer" class="form-select"
-                                required>
-                            <option value="" disabled selected>Select Manufacturer</option>
-                            <!-- Dynamic options will be added here -->
-                        </select>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" name="medication_manufacturer"
+                               placeholder="Manufacturer">
                     </div>
-
-                    <!-- Medication Dropdown -->
-                    <div class="col-md-6">
-                        <label for="medication_name" class="form-label">Medication</label>
-                        <select id="medication_name" name="medication_name" class="form-select" required>
-                            <option value="" disabled selected>Select Medication</option>
-                            <!-- Dynamic options will be added here -->
-                        </select>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" name="medication_name" placeholder="Medication">
                     </div>
-
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" name="medication_dose" placeholder="Dose">
+                    </div>
                     <div class="col-md-12 text-end">
                         <button type="button" class="btn btn-secondary" id="add-medication">Add Medication</button>
                     </div>
@@ -331,76 +317,61 @@
             <div class="p-3 border rounded">
                 <div id="condition-list">
                     <div class="form-check">
-                        <input class="form-check-input condition-checkbox" type="checkbox" name="conditions"
-                               id="condition-hbp"
+                        <input class="form-check-input" type="checkbox" name="conditions" id="condition-hbp"
                                value="High Blood Pressure">
                         <label class="form-check-label" for="condition-hbp">High Blood Pressure</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input condition-checkbox" type="checkbox" name="conditions"
-                               id="condition-diabetes"
+                        <input class="form-check-input" type="checkbox" name="conditions" id="condition-diabetes"
                                value="Diabetes">
                         <label class="form-check-label" for="condition-diabetes">Diabetes</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input condition-checkbox" type="checkbox" name="conditions"
-                               id="condition-hearing-aid"
+                        <input class="form-check-input" type="checkbox" name="conditions" id="condition-hearing-aid"
                                value="Hearing Aid">
                         <label class="form-check-label" for="condition-hearing-aid">Hearing Aid</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input condition-checkbox" type="checkbox" name="conditions"
-                               id="condition-pacemaker"
+                        <input class="form-check-input" type="checkbox" name="conditions" id="condition-pacemaker"
                                value="Pacemaker">
                         <label class="form-check-label" for="condition-pacemaker">Pacemaker</label>
                     </div>
                 </div>
-                <button type="button" class="btn btn-secondary mt-3" id="lock-conditions">Lock</button>
             </div>
         </div>
-
-
-        <!-- Allergies Section -->
         <div class="col-md-6 text-center p-3 border rounded">
+            <!-- Allergies Section -->
             <h2 class="text-center mb-4">Allergies & Intolerances</h2>
             <div class="p-2 border rounded text-center">
                 <label class="form-label mb-3">Select Allergies</label>
                 <div id="allergy-list">
                     <div class="form-check mb-2">
-                        <input class="form-check-input allergy-checkbox" type="checkbox" name="allergies"
-                               id="allergy-peanut"
+                        <input class="form-check-input" type="checkbox" name="allergies" id="allergy-peanut"
                                value="Peanut">
                         <label class="form-check-label" for="allergy-peanut">Peanut</label>
                     </div>
                     <div class="form-check mb-2">
-                        <input class="form-check-input allergy-checkbox" type="checkbox" name="allergies"
-                               id="allergy-lactose"
+                        <input class="form-check-input" type="checkbox" name="allergies" id="allergy-lactose"
                                value="Lactose">
                         <label class="form-check-label" for="allergy-lactose">Lactose</label>
                     </div>
                     <div class="form-check mb-2">
-                        <input class="form-check-input allergy-checkbox" type="checkbox" name="allergies"
-                               id="allergy-penicillin"
+                        <input class="form-check-input" type="checkbox" name="allergies" id="allergy-penicillin"
                                value="Penicillin">
                         <label class="form-check-label" for="allergy-penicillin">Penicillin</label>
                     </div>
                     <div class="form-check mb-2">
-                        <input class="form-check-input allergy-checkbox" type="checkbox" name="allergies"
-                               id="allergy-soy"
-                               value="Soy">
+                        <input class="form-check-input" type="checkbox" name="allergies" id="allergy-soy" value="Soy">
                         <label class="form-check-label" for="allergy-soy">Soy</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input allergy-checkbox" type="checkbox" name="allergies"
-                               id="allergy-shellfish"
+                        <input class="form-check-input" type="checkbox" name="allergies" id="allergy-shellfish"
                                value="Shellfish">
                         <label class="form-check-label" for="allergy-shellfish">Shellfish</label>
                     </div>
                 </div>
-                <button type="button" class="btn btn-secondary mt-3" id="lock-allergies">Lock</button>
             </div>
         </div>
-
 
         <button type="submit" class="btn btn-custom w-100">Save</button>
     </form>

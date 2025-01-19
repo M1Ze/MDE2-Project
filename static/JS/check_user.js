@@ -1,3 +1,4 @@
+// check_user.js
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
 
