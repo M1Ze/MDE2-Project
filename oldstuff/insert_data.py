@@ -1,13 +1,13 @@
 import glob
 import os
 
-from data_extraction.allergy_intolerance_data import AllergyIntoleranceData
-from data_extraction.consent_data import ConsentData
-from data_extraction.medication_data import MedicationData
-from data_extraction.observation_data import ObservationData
+from fhir_data_processing.allergy_intolerance_data import AllergyIntoleranceData
+from fhir_data_processing.consent_data import ConsentData
+from fhir_data_processing.medication_data import MedicationData
+from fhir_data_processing.observation_data import ObservationData
 
 
-# from data_extraction.patient_data import PatientData
+# from fhir_data_processing.patient_data import PatientData
 #
 # patient = PatientData()
 # patient.name = "John Doe"

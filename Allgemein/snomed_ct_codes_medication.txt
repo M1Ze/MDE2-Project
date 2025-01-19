@@ -1,0 +1,7 @@
+Medication Name	SNOMED CT Code	Manufacturer
+Aspirin	10854007	PharmaCorp Inc.
+Ibuprofen	56409004	PharmaCorp Inc.
+Paracetamol	387517004	MediLife Ltd.
+Amoxicillin	372687004	MediLife Ltd.
+Ciprofloxacin	387460000	HealthCare Solutions
+Metformin	860975000	HealthCare Solutions

@@ -1,9 +1,9 @@
 import glob
 import os
 
-from data_extraction.patient_data import PatientData
-from data_extraction.observation_data import ObservationData
-from data_extraction.medication_data import MedicationData
+from fhir_data_processing.patient_data import PatientData
+from fhir_data_processing.observation_data import ObservationData
+from fhir_data_processing.medication_data import MedicationData
 from db_models import Patient
 
 #filepath to json
