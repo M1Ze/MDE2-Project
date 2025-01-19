@@ -20,15 +20,16 @@
         </div>
         <div class="col-md-6">
             <label for="inputPassword4" class="form-label">Password</label>
-            <input type="password" class="form-control" name="password" id="inputPassword4" minlength="8" required>
+            <input type="password" class="form-control" name="password" id="inputPassword4" minlength="8"
+                    pattern="[a-zA-Z0-9._%+-@]{8,}" required>
             <div class="invalid-feedback">Password must be at least 8 characters long.</div>
         </div>
 
         <!-- First and Last Name -->
         <div class="col-md-6">
-            <input type="text" class="form-control" name="first_name" placeholder="First name" aria-label="First name"
+            <input type="text" class="form-control" name="given_name" placeholder="Given name" aria-label="Given name"
                    required>
-            <div class="invalid-feedback">Please provide your first name.</div>
+            <div class="invalid-feedback">Please provide your given name.</div>
         </div>
         <div class="col-md-6">
             <input type="text" class="form-control" name="last_name" placeholder="Last name" aria-label="Last name"

@@ -1,3 +1,4 @@
+// login.js
 document.getElementById('login-form').addEventListener('submit', function (event) {
     event.preventDefault();
 
@@ -24,7 +25,7 @@ document.getElementById('login-form').addEventListener('submit', function (event
                 console.log('Login successful!', data);
                 localStorage.setItem('token', data.token); // save token local
                 alert('Welcome!');
-                window.location.href = '/appointments';
+                window.location.href = '/userPatientInfo';
             } else {
                 alert(data.message || 'Login failed!');
             }

@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 import generate_qr
 import jwt
 
+from generate_qr import generate_qr_code_binary
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -63,8 +64,8 @@ def register():
         data = request.get_json()
         user_data = data.get('user')
         email = user_data.get('email')
-        given_name = user_data.get('given_name')
-        last_name = user_data.get('last_name')
+        given_name = user_data.get('givenName')
+        last_name = user_data.get('lastName')
         password = data.get('password')
 
         if not email or not password:
@@ -77,13 +78,16 @@ def register():
 
         hashed_password = generate_password_hash(password)
         new_user = User(email=email, password=hashed_password, role='User')
-        print(email)
-        print(given_name)
-        print(last_name)
+        new_patient = Patient(name=f"{given_name} {last_name}")
 
         try:
-            # Save the user and FHIR ID in the database
             db.session.add(new_user)
+            db.session.flush()  # Ensures `new_user.id` is populated without committing yet
+
+            new_patient.user_id = new_user.id
+            db.session.add(new_patient)
+            db.session.flush()
+            new_patient.qr_code= generate_qr_code_binary(new_patient.id)
             db.session.commit()
             return jsonify({'status': 'success', 'message': 'User registered'}), 200
         except Exception as e:
@@ -108,7 +112,7 @@ def login():
 
         # create token
         token = jwt.encode(
-            {'user_id': user.id, 'exp': datetime.utcnow() + timedelta(seconds=30)},
+            {'user_id': user.id, 'exp': datetime.utcnow() + timedelta(hours=1)},
             # Ablaufzeit 24 Stunden hours =24 oder seconds=10
             app.secret_key,
             algorithm='HS256'
@@ -116,30 +120,57 @@ def login():
         return jsonify(
             {'status': 'success', 'message': 'Login successful', 'token': token})  # opt. add user_id': user.id ,
 
-
 @app.route('/checklogin', methods=['GET', 'POST'])
 def checklogin():
-    def appointments_user():
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith("Bearer "):
-            return redirect('/appointmentsDefault')
-        token_check = check_token(auth_header.split(" ")[1])
-        if 'error' in token_check:
-            return jsonify({'status': 'error', 'message': token_check['error']}), 401
-        try:
-            user_id = token_check['user_id']
-            user = User.query.get(user_id)
-        except KeyError:
-            return jsonify({'status': 'error', 'message': 'No user found'}), 404
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith("Bearer "):
+        # Return error response for missing token
+        return jsonify({'status': 'error', 'message': 'No token provided'}), 401
 
-        if not user:
-            return jsonify({'status': 'error', 'message': 'User not found'}), 404
-        patient = User.query.filter_by(user_id=user_id).first()
-        patient_data = get_patient_data(patient.fhir_id) if patient else None
-        appointments = user.appointments
-        return None
-        #return render_template('appointments_user.html', patient=patient_data, appointments=appointments)
+    token = auth_header.split(" ")[1]
+    token_check = check_token(token)  # Use your token validation function
+
+    if 'error' in token_check:
+        # Return error response for invalid token
+        return jsonify({'status': 'error', 'message': token_check['error']}), 401
+
+    # Return success response for valid token
+    return jsonify({'status': 'success', 'user_id': token_check['user_id']}), 200
+
+
+@app.route('/getPatientInformation', methods=['GET'])
+def get_patient_information():
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({'status': 'error', 'message': 'No token provided'}), 401
+
+    token = auth_header.split(" ")[1]
+    token_check = check_token(token)  # Your token validation logic
+    if not token_check or 'user_id' not in token_check:
+        return jsonify({'status': 'error', 'message': 'Invalid token'}), 401
+
+    user_id = token_check['user_id']
+    patient = Patient.query.filter_by(user_id=user_id).first()
+    if not patient:
+        return jsonify({'status': 'error', 'message': 'Patient not found'}), 404
+
+    # Serialize the patient data for the frontend
+    patient_data = {
+        'given_name': patient.name.split(" ")[0],
+        'last_name': patient.name.split(" ")[1],
+        # 'gender': patient.gender,
+        # 'birthday': patient.birthday.isoformat() if patient.birthday else None,
+        # 'countryCode': patient.country_code,
+        # 'phonenumber': patient.phone_number,
+        # 'address': patient.address,
+        # 'zip': patient.zip,
+        # 'city': patient.city,
+        # 'state': patient.state,
+    }
+    print(patient_data)
+    return jsonify({'status': 'success', 'patient': patient_data})
+
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run(host='0.0.0.0', port=8000, debug=False)
