@@ -1,11 +1,13 @@
 import unittest
 
+from data_extraction.condition_data import ConditionData
 from data_extraction.patient_data import PatientData
 from data_extraction.medication_data import MedicationData
 from data_extraction.observation_data import ObservationData
 from data_extraction.care_plan_data import CarePlanData
 from data_extraction.allergy_intolerance_data import AllergyIntoleranceData
 from data_extraction.consent_data import ConsentData
+from data_extraction.condition_data import ConditionData
 
 
 class TestFHIRDataClasses(unittest.TestCase):
@@ -277,6 +279,44 @@ class TestFHIRDataClasses(unittest.TestCase):
         self.assertEqual(new_allergy.identifier, "allergy002")
         self.assertEqual(new_allergy.criticality, "unable-to-assess")
 
+    def test_condition_data_create_fhir(self):
+        condition = ConditionData()
+        condition.condition_code = "73211009" #Hypertension
+        condition.patient_identifier = "1111010180"
+        condition.recorded_date = "2025-01-01"
+
+        json_string = condition.create_fhir()
+
+        self.assertTrue(json_string)
+        self.assertIn('code', json_string)
+        self.assertIn('subject', json_string)
+
+    def test_condition_data_extract_data(self):
+        condition = ConditionData()
+        condition.condition_code = "73211009"  # Hypertension
+        condition.patient_identifier = "1111010180"
+        condition.recorded_date = "2025-01-01"
+
+        json_string = condition.create_fhir()
+        new_condition = ConditionData()
+        new_condition.extract_data(None, json_string)
+
+        self.assertEqual(new_condition.condition_code, "73211009")
+        self.assertEqual(new_condition.patient_identifier, "1111010180")
+        self.assertEqual(new_condition.recorded_date, "2025-01-01")
+
+    def test_condition_data_edge_case_missing_code(self):
+        condition_no_code = ConditionData()
+        condition_no_code.patient_identifier = "1111010180"
+        condition_no_code.recorded_date = "2025-01-01"
+
+        json_string = condition_no_code.create_fhir()
+        new_condition = ConditionData()
+        new_condition.extract_data(None, json_string)
+
+        self.assertEqual(new_condition.patient_identifier, "1111010180")
+        self.assertEqual(new_condition.recorded_date, "2025-01-01")
+        self.assertEqual(new_condition.condition_code, None)
 
 if __name__ == "__main__":
     unittest.main()
