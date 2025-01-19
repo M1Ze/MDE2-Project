@@ -31,7 +31,7 @@
         <!--Social Security Number-->
         <div class="col-md-6">
             <label for="inputSocialSecurityNumber" class="form-label">Social Security Number</label>
-            <input type="number" class="form-control" name="socialsecurityumber"
+            <input type="number" class="form-control" name="socialsecuritynumber"
                    id="inputSocialSecurityNumber" min="1000" max="9999" required>
             <div class="invalid-feedback">Please enter a valid Austrian Social Security Number.</div>
         </div>
@@ -111,8 +111,7 @@
         <!-- Height -->
         <div class="col-md-6">
             <label for="inputHeight" class="form-label">Height</label>
-            <input type="number" class="form-control" name="height" id="inputHeight" placeholder="Enter height"
-                   required>
+            <input type="number" class="form-control" name="height" id="inputHeight" placeholder="Enter height">
             <div class="form-check">
                 <input class="form-check-input" type="radio" name="height_unit" id="height_cm" value="cm" checked>
                 <label class="form-check-label" for="height_cm">cm</label>
@@ -122,7 +121,7 @@
         <div class="col-md-6">
             <label for="inputWeight" class="form-label">Weight</label>
             <input type="number" class="form-control" name="weight" id="inputWeight" placeholder="Enter weight"
-                   min="1" max="500" required>
+                   min="1" max="500" >
             <div class="form-check">
                 <input class="form-check-input" type="radio" name="weight_unit" id="weight_kg" value="kg" checked>
                 <label class="form-check-label" for="weight_kg">kg</label>
@@ -165,20 +164,18 @@
         <!--Change First and Last Name -->
         <div class="col-md-6">
             <input type="text" class="form-control" name="contact_given_name" placeholder="Given name of your contact"
-                   aria-label="Given name of your contact"
-                   required>
+                   aria-label="Given name of your contact">
             <div class="invalid-feedback">Please provide your first name.</div>
         </div>
         <div class="col-md-6">
             <input type="text" class="form-control" name="contact_last_name" placeholder="Last name of your contact"
-                   aria-label="Last nameof your contact"
-                   required>
+                   aria-label="Last nameof your contact">
             <div class="invalid-feedback">Please provide your last name.</div>
         </div>
         <!-- Telephone number-->
         <div class="col-md-2">
             <label for="inputContactCountryCode" class="form-label">Country Code</label>
-            <select id="inputContactCountryCode" name="countryCode" class="form-select" required>
+            <select id="inputContactCountryCode" name="countryCode" class="form-select">
                 <option value="" disabled>Choose...</option>
                 <option value="+43" selected>Austria (+43)</option>
                 <option value="+49">Germany (+49)</option>
@@ -194,7 +191,7 @@
         <div class="col-md-6">
             <label for="inputContactPhonenumber" class="form-label">Telephone Number</label>
             <input type="number" class="form-control" name="phonenumber" id="inputContactPhonenumber" min="0000000000"
-                   max="9999999999999" required>
+                   max="9999999999999">
         </div>
 
         <!-- Blood Type and Rhesus Factor -->
@@ -208,22 +205,22 @@
                     <label>Blood Type:</label>
                     <div class="form-check">
                         <input class="form-check-input blood-radio" type="radio" name="blood_type" id="blood_a"
-                               value="A" required>
+                               value="A">
                         <label class="form-check-label" for="blood_a">A</label>
                     </div>
                     <div class="form-check">
                         <input class="form-check-input blood-radio" type="radio" name="blood_type" id="blood_b"
-                               value="B" required>
+                               value="B">
                         <label class="form-check-label" for="blood_b">B</label>
                     </div>
                     <div class="form-check">
                         <input class="form-check-input blood-radio" type="radio" name="blood_type" id="blood_ab"
-                               value="AB" required>
+                               value="AB">
                         <label class="form-check-label" for="blood_ab">AB</label>
                     </div>
                     <div class="form-check">
                         <input class="form-check-input blood-radio" type="radio" name="blood_type" id="blood_o"
-                               value="O" required>
+                               value="O">
                         <label class="form-check-label" for="blood_o">O</label>
                     </div>
                 </div>
@@ -232,12 +229,12 @@
                     <label>Rhesus Factor:</label>
                     <div class="form-check">
                         <input class="form-check-input rhesus-radio" type="radio" name="rhesus_factor" id="rhesus_pos"
-                               value="+" required>
+                               value="+">
                         <label class="form-check-label" for="rhesus_pos">Positive (+)</label>
                     </div>
                     <div class="form-check">
                         <input class="form-check-input rhesus-radio" type="radio" name="rhesus_factor" id="rhesus_neg"
-                               value="-" required>
+                               value="-">
                         <label class="form-check-label" for="rhesus_neg">Negative (-)</label>
                     </div>
                 </div>
@@ -302,8 +299,7 @@
                     <!-- Manufacturer Dropdown -->
                     <div class="col-md-6">
                         <label for="medication_manufacturer" class="form-label">Manufacturer</label>
-                        <select id="medication_manufacturer" name="medication_manufacturer" class="form-select"
-                                required>
+                        <select id="medication_manufacturer" name="medication_manufacturer" class="form-select">
                             <option value="" disabled selected>Select Manufacturer</option>
                             <!-- Dynamic options will be added here -->
                         </select>
@@ -312,7 +308,7 @@
                     <!-- Medication Dropdown -->
                     <div class="col-md-6">
                         <label for="medication_name" class="form-label">Medication</label>
-                        <select id="medication_name" name="medication_name" class="form-select" required>
+                        <select id="medication_name" name="medication_name" class="form-select">
                             <option value="" disabled selected>Select Medication</option>
                             <!-- Dynamic options will be added here -->
                         </select>

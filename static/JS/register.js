@@ -31,11 +31,12 @@
             if (localStorage.getItem('token')) {
                 localStorage.removeItem('token');
             }
-            const userData = createUserJson();
+
+            const fhirPatient = createFHIRPatientFromRegisterForm();
             const password = document.querySelector('input[name="password"]').value.trim();
 
             const requestBody = {
-                user: userData,
+                user: fhirPatient,
                 password: password
             };
 
@@ -47,39 +48,42 @@
                 body: JSON.stringify(requestBody)
             })
                 .then(async (response) => {
-                    // Parse JSON response
                     const data = await response.json();
 
-                    // Check if the backend returned an error
                     if (!response.ok) {
                         throw new Error(data.message || 'Registration failed');
                     }
 
-                    // Successful registration
                     if (data.status === 'success') {
                         console.log('Server Response:', data);
                         alert('Registration successful!');
                         window.location.href = '/login';
                     } else {
-                        // Handle unexpected cases
                         console.error('Unexpected response:', data);
                         alert(data.message || 'Failed to register.');
                     }
                 })
                 .catch((error) => {
-                    // Display backend error message (if available)
-                    console.error('Hier der Fehler!!!!:', error.message);
+                    console.error('Error:', error.message);
                     alert(error.message || 'An error occurred. Please try again.');
                 });
         }
     });
 
-    function createUserJson() {
+function createFHIRPatientFromRegisterForm() {
+    // Extract values from the form
     const givenName = document.querySelector('input[name="given_name"]').value.trim();
     const lastName = document.querySelector('input[name="last_name"]').value.trim();
     const email = document.querySelector('input[name="email"]').value.trim();
     const socialsecuritynumber = document.querySelector('input[name="socialsecuritynumber"]').value.trim();
-    const birthdate = document.querySelector('input[name="birthday"]').value.trim(); // Fixing the name to 'birthday'
+    const birthdate = document.querySelector('input[name="birthday"]').value.trim();
+    const address = document.querySelector('input[name="address"]').value.trim();
+    const city = document.querySelector('input[name="city"]').value.trim();
+    const postalCode = document.querySelector('input[name="zip"]').value.trim();
+    const state = document.querySelector('select[name="state"]').value.trim();
+    const gender = document.querySelector('select[name="gender"]').value.trim();
+    const countryCode = document.querySelector('select[name="countryCode"]').value.trim();
+    const phoneNumber = document.querySelector('input[name="phonenumber"]').value.trim();
 
     // Format birthdate as DDMMYYYY
     const birthdateParts = birthdate.split('-'); // Split date into [YYYY, MM, DD]
@@ -88,12 +92,72 @@
     // Concatenate SSN with formatted birthdate
     const formattedSSN = `${socialsecuritynumber}${formattedBirthdate}`;
 
+    // Construct the FHIR Patient resource
     return {
-        givenName: givenName,
-        lastName: lastName,
-        email: email,
-        ssn: formattedSSN, // Set formatted SSN
+        resourceType: "Patient",
+        identifier: [
+            {
+                system: "urn:oid:1.2.40.0.10.1.4.1", // Example system for SSN
+                value: formattedSSN,
+                type: {
+                    text: "Social Security Number"
+                }
+            }
+        ],
+        name: [
+            {
+                use: "official",
+                family: lastName,
+                given: [givenName]
+            }
+        ],
+        gender: gender.toLowerCase(), // Convert to lowercase as per FHIR spec
+        birthDate: birthdate,
+        telecom: [
+            {
+                system: "email",
+                value: email,
+                use: "home"
+            },
+            {
+                system: "phone",
+                value: `${countryCode} ${phoneNumber}`,
+                use: "mobile"
+            }
+        ],
+        address: [
+            {
+                line: [address],
+                city: city,
+                postalCode: postalCode,
+                state: state,
+                country: "Austria" // Fixed to Austria
+            }
+        ]
     };
 }
 
-})();
+// function createUserJson() {
+//     const givenName = document.querySelector('input[name="given_name"]').value.trim();
+//     const lastName = document.querySelector('input[name="last_name"]').value.trim();
+//     const email = document.querySelector('input[name="email"]').value.trim();
+//     const socialsecuritynumber = document.querySelector('input[name="socialsecuritynumber"]').value.trim();
+//     const birthdate = document.querySelector('input[name="birthday"]').value.trim(); // Fixing the name to 'birthday'
+//
+//     // Format birthdate as DDMMYYYY
+//     const birthdateParts = birthdate.split('-'); // Split date into [YYYY, MM, DD]
+//     const formattedBirthdate = `${birthdateParts[2]}${birthdateParts[1]}${birthdateParts[0]}`;
+//
+//     // Concatenate SSN with formatted birthdate
+//     const formattedSSN = `${socialsecuritynumber}${formattedBirthdate}`;
+//
+//     return {
+//         givenName: givenName,
+//         lastName: lastName,
+//         email: email,
+//         ssn: formattedSSN, // Set formatted SSN
+//     };
+// }
+
+})
+();

@@ -1,6 +1,6 @@
 #db_models.py
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import BLOB
+from sqlalchemy import BLOB, JSON
 
 db = SQLAlchemy()
 
@@ -9,7 +9,7 @@ class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     identifier = db.Column(db.String(100), unique=True, nullable=True)  # Unique patient identifier (SVN)
     name = db.Column(db.String(200), nullable=False)  # Patient's full name
-    pat_data = db.Column(db.Text, nullable=True)  # JSON data for FHIR resource
+    pat_data = db.Column(JSON, nullable=True)  # JSON data for FHIR resource
     qr_code = db.Column(BLOB, nullable=False)  # Path to the QR code image
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Foreign key to User
 
