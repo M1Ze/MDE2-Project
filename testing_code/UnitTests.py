@@ -1,11 +1,11 @@
 import unittest
-
-from data_extraction.patient_data import PatientData
-from data_extraction.medication_data import MedicationData
-from data_extraction.observation_data import ObservationData
-from data_extraction.care_plan_data import CarePlanData
-from data_extraction.allergy_intolerance_data import AllergyIntoleranceData
-from data_extraction.consent_data import ConsentData
+from fhir_data_processing.patient_data import PatientData
+from fhir_data_processing.medication_data import MedicationData
+from fhir_data_processing.observation_data import ObservationData
+from fhir_data_processing.care_plan_data import CarePlanData
+from fhir_data_processing.allergy_intolerance_data import AllergyIntoleranceData
+from fhir_data_processing.consent_data import ConsentData
+from fhir_data_processing.condition_data import ConditionData
 
 
 class TestFHIRDataClasses(unittest.TestCase):
@@ -103,8 +103,8 @@ class TestFHIRDataClasses(unittest.TestCase):
     def test_medication_data_create_fhir(self):
         medication = MedicationData()
         medication.identifier = "med001"
-        medication.name = "Ibuprofen"
-        medication.dose_form = "Tablet"
+        medication.code = '1624811000001102'
+        medication.dose = "100 mg" #only class variable, not in json
         medication.manufacturer = "Generic Pharma Inc."
         medication.ingredients = [
             {"item": "Ibuprofen", "quantity": "200 mg"},
@@ -115,13 +115,13 @@ class TestFHIRDataClasses(unittest.TestCase):
 
         self.assertTrue(json_string)  # Check if any JSON was generated
         self.assertIn('identifier', json_string)  # Ensure 'identifier' key is present
-        self.assertIn('ingredient', json_string)  # Use the correct key name 'ingredient'
+        self.assertIn('"Generic Pharma Inc."', json_string)
 
     def test_medication_data_extract_data(self):
         medication = MedicationData()
         medication.identifier = "med001"
-        medication.name = "Ibuprofen"
-        medication.dose_form = "Tablet"
+        medication.code = '1624811000001102'
+        medication.dose = '100 mg'
         medication.manufacturer = "Generic Pharma Inc."
         medication.ingredients = [
             {"item": "Ibuprofen", "quantity": "200 mg"},
@@ -133,18 +133,20 @@ class TestFHIRDataClasses(unittest.TestCase):
         new_medication.extract_data(None, json_string)
 
         self.assertEqual(new_medication.identifier, "med001")
-        self.assertEqual(new_medication.name, "Ibuprofen")
+        self.assertEqual(new_medication.code, '1624811000001102')
+
 
     def test_medication_data_edge_case_missing_manufacturer(self):
         medication_missing_manufacturer = MedicationData()
         medication_missing_manufacturer.identifier = "med002"
-        medication_missing_manufacturer.name = "Aspirin"
+        medication_missing_manufacturer.code = '387458008'
 
         json_string = medication_missing_manufacturer.create_fhir()
         new_medication = MedicationData()
         new_medication.extract_data(None, json_string)
 
         self.assertEqual(new_medication.identifier, "med002")
+        self.assertEqual(new_medication.code, '387458008')
         self.assertEqual(new_medication.manufacturer, None)
 
     def test_consent_data_create_fhir(self):
@@ -277,6 +279,44 @@ class TestFHIRDataClasses(unittest.TestCase):
         self.assertEqual(new_allergy.identifier, "allergy002")
         self.assertEqual(new_allergy.criticality, "unable-to-assess")
 
+    def test_condition_data_create_fhir(self):
+        condition = ConditionData()
+        condition.condition_code = "73211009" #Hypertension
+        condition.patient_identifier = "1111010180"
+        condition.recorded_date = "2025-01-01"
+
+        json_string = condition.create_fhir()
+
+        self.assertTrue(json_string)
+        self.assertIn('code', json_string)
+        self.assertIn('subject', json_string)
+
+    def test_condition_data_extract_data(self):
+        condition = ConditionData()
+        condition.condition_code = "73211009"  # Hypertension
+        condition.patient_identifier = "1111010180"
+        condition.recorded_date = "2025-01-01"
+
+        json_string = condition.create_fhir()
+        new_condition = ConditionData()
+        new_condition.extract_data(None, json_string)
+
+        self.assertEqual(new_condition.condition_code, "73211009")
+        self.assertEqual(new_condition.patient_identifier, "1111010180")
+        self.assertEqual(new_condition.recorded_date, "2025-01-01")
+
+    def test_condition_data_edge_case_missing_code(self):
+        condition_no_code = ConditionData()
+        condition_no_code.patient_identifier = "1111010180"
+        condition_no_code.recorded_date = "2025-01-01"
+
+        json_string = condition_no_code.create_fhir()
+        new_condition = ConditionData()
+        new_condition.extract_data(None, json_string)
+
+        self.assertEqual(new_condition.patient_identifier, "1111010180")
+        self.assertEqual(new_condition.recorded_date, "2025-01-01")
+        self.assertEqual(new_condition.condition_code, None)
 
 if __name__ == "__main__":
     unittest.main()

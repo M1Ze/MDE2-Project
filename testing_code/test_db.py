@@ -1,11 +1,11 @@
 from flask import Flask, render_template
 from db_models import db, Patient, HealthData, User
-from data_extraction.patient_data import PatientData
-from data_extraction.observation_data import ObservationData
-from data_extraction.medication_data import MedicationData
-from data_extraction.consent_data import ConsentData
-from data_extraction.care_plan_data import CarePlanData
-from data_extraction.allergy_intolerance_data import AllergyIntoleranceData
+from fhir_data_processing.patient_data import PatientData
+from fhir_data_processing.observation_data import ObservationData
+from fhir_data_processing.medication_data import MedicationData
+from fhir_data_processing.consent_data import ConsentData
+from fhir_data_processing.care_plan_data import CarePlanData
+from fhir_data_processing.allergy_intolerance_data import AllergyIntoleranceData
 from datetime import datetime
 import generate_qr
 
