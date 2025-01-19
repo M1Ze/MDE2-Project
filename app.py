@@ -66,6 +66,7 @@ def register():
         email = user_data.get('email')
         given_name = user_data.get('givenName')
         last_name = user_data.get('lastName')
+        social_security_number = user_data.get('ssn')
         password = data.get('password')
 
         if not email or not password:
@@ -78,7 +79,7 @@ def register():
 
         hashed_password = generate_password_hash(password)
         new_user = User(email=email, password=hashed_password, role='User')
-        new_patient = Patient(name=f"{given_name} {last_name}")
+        new_patient = Patient(name=f"{given_name} {last_name}", identifier=social_security_number)
 
         try:
             db.session.add(new_user)

@@ -75,16 +75,25 @@
     });
 
     function createUserJson() {
-        const givenName = document.querySelector('input[name="given_name"]').value.trim();
-        const lastName = document.querySelector('input[name="last_name"]').value.trim();
-        const email = document.querySelector('input[name="email"]').value.trim();
-        const svn = document.querySelector('input[name="socialsecuritynumber"]').value.trim();
+    const givenName = document.querySelector('input[name="given_name"]').value.trim();
+    const lastName = document.querySelector('input[name="last_name"]').value.trim();
+    const email = document.querySelector('input[name="email"]').value.trim();
+    const socialsecuritynumber = document.querySelector('input[name="socialsecuritynumber"]').value.trim();
+    const birthdate = document.querySelector('input[name="birthday"]').value.trim(); // Fixing the name to 'birthday'
 
-        return {
-            givenName: givenName,
-            lastName: lastName,
-            email: email,
-            ssn: svn,
-        };
-    }
+    // Format birthdate as DDMMYYYY
+    const birthdateParts = birthdate.split('-'); // Split date into [YYYY, MM, DD]
+    const formattedBirthdate = `${birthdateParts[2]}${birthdateParts[1]}${birthdateParts[0]}`;
+
+    // Concatenate SSN with formatted birthdate
+    const formattedSSN = `${socialsecuritynumber}${formattedBirthdate}`;
+
+    return {
+        givenName: givenName,
+        lastName: lastName,
+        email: email,
+        ssn: formattedSSN, // Set formatted SSN
+    };
+}
+
 })();
