@@ -78,11 +78,13 @@
         const givenName = document.querySelector('input[name="given_name"]').value.trim();
         const lastName = document.querySelector('input[name="last_name"]').value.trim();
         const email = document.querySelector('input[name="email"]').value.trim();
+        const svn = document.querySelector('input[name="socialsecuritynumber"]').value.trim();
 
         return {
             givenName: givenName,
             lastName: lastName,
             email: email,
+            ssn: svn,
         };
     }
 })();
