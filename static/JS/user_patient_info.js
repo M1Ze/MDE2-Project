@@ -1,5 +1,44 @@
 // user_patient_info.js
 
+
+function setupPregnancySectionVisibility() {
+    const genderField = document.getElementById('inputGender');
+    const pregnancySection = document.getElementById('pregnancy-section');
+    const pregnancyWeeksDropdown = document.getElementById('pregnancy-weeks');
+    const pregnantYes = document.getElementById('pregnant_yes');
+    const pregnantNo = document.getElementById('pregnant_no');
+
+    // Function to toggle the pregnancy section based on gender
+    function togglePregnancySection() {
+        const gender = genderField.value.toLowerCase();
+        if (['female', 'unknown', 'other'].includes(gender)) {
+            pregnancySection.style.display = 'block';
+        } else {
+            pregnancySection.style.display = 'none';
+            pregnancyWeeksDropdown.style.display = 'none'; // Hide weeks dropdown if section is hidden
+        }
+    }
+
+    // Function to toggle the weeks dropdown based on pregnancy status
+    function togglePregnancyWeeks() {
+        if (pregnantYes.checked) {
+            pregnancyWeeksDropdown.style.display = 'block';
+        } else {
+            pregnancyWeeksDropdown.style.display = 'none';
+        }
+    }
+
+    // 1. Immediately call both functions on page load
+    togglePregnancySection(); // Set visibility of pregnancy section based on pre-selected gender
+    togglePregnancyWeeks();   // Set visibility of weeks dropdown based on pre-selected pregnancy status
+
+    // 2. Set up event listeners for user interactions
+    genderField.addEventListener('change', togglePregnancySection);
+    pregnantYes.addEventListener('change', togglePregnancyWeeks);
+    pregnantNo.addEventListener('change', togglePregnancyWeeks);
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('.needs-validation');
 
@@ -215,85 +254,142 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Gather Observations Function
     function gatherObservations() {
-        const observations = [];
+    const observations = [];
 
-        // Height Observation
-        const heightValue = document.querySelector('#inputHeight')?.value.trim() || null;
-        const heightUnit = document.querySelector('input[name="height_unit"]:checked')?.value || null;
-        if (heightValue) {
-            observations.push(createObservation('Height', heightValue, heightUnit));
-        }
-
-        // Weight Observation
-        const weightValue = document.querySelector('#inputWeight')?.value.trim() || null;
-        const weightUnit = document.querySelector('input[name="weight_unit"]:checked')?.value || null;
-        if (weightValue) {
-            observations.push(createObservation('Weight', weightValue, weightUnit));
-        }
-
-        // Blood Type and Rhesus Factor Observation
-        const bloodType = document.querySelector('input[name="blood_type"]:checked')?.value || null;
-        const rhesusFactor = document.querySelector('input[name="rhesus_factor"]:checked')?.value || null;
-        if (bloodType && rhesusFactor) {
-            observations.push(createObservation('Blood Type', `${bloodType} ${rhesusFactor}`, null));
-        }
-
-        // Pregnancy Status Observation
-        const gender = document.querySelector('#inputGender')?.value.toLowerCase() || null;
-        if (['female', 'unknown', 'other'].includes(gender)) {
-            const pregnancyStatus = document.querySelector('input[name="pregnancy_status"]:checked')?.value || null;
-            if (pregnancyStatus) {
-                const pregnancyObservation = createObservation('Pregnancy Status', pregnancyStatus, null);
-
-                if (pregnancyStatus === 'yes') {
-                    const pregnancyWeeks = document.querySelector('#pregnancyWeeks')?.value.trim() || null;
-                    if (pregnancyWeeks) {
-                        pregnancyObservation.pregnancyWeeks = pregnancyWeeks;
-                    }
-                }
-
-                observations.push(pregnancyObservation);
-            }
-        }
-
-        return observations;
+    // Height Observation
+    const heightValue = document.querySelector('#inputHeight')?.value.trim() || null;
+    const heightUnit = document.querySelector('input[name="height_unit"]:checked')?.value || null;
+    console.log("Height:", heightValue, heightUnit);
+    if (heightValue) {
+        observations.push(createObservation('Height', heightValue, heightUnit));
     }
 
+    // Weight Observation
+    const weightValue = document.querySelector('#inputWeight')?.value.trim() || null;
+    const weightUnit = document.querySelector('input[name="weight_unit"]:checked')?.value || null;
+    console.log("Weight:", weightValue, weightUnit);
+    if (weightValue) {
+        observations.push(createObservation('Weight', weightValue, weightUnit));
+    }
 
-    function createObservation(type, value, unit) {
-        return {
-            resourceType: "Observation",
-            status: "final",
-            category: [
-                {
-                    coding: [
-                        {
-                            system: "http://terminology.hl7.org/CodeSystem/observation-category",
-                            code: "vital-signs",
-                            display: "Vital Signs"
-                        }
-                    ]
-                }
-            ],
-            code: {
+    // Blood Type and Rhesus Factor Observation
+    const bloodType = document.querySelector('input[name="blood_type"]:checked')?.value || null;
+    const rhesusFactor = document.querySelector('input[name="rhesus_factor"]:checked')?.value || null;
+    console.log("Blood Type:", bloodType);
+    console.log("Rhesus Factor:", rhesusFactor);
+    if (bloodType && rhesusFactor) {
+        observations.push(createObservation('Blood Type', bloodType, null));
+        observations.push(createObservation('Rhesus Factor', rhesusFactor, null));
+    }
+
+    // Pregnancy Status Observation
+    const gender = document.querySelector('#inputGender')?.value.toLowerCase() || null;
+    const pregnancyStatus = document.querySelector('input[name="pregnancy_status"]:checked')?.value || null;
+    const pregnancyWeeks = document.querySelector('#pregnancyWeeks')?.value.trim() || null;
+    console.log("Gender:", gender);
+    console.log("Pregnancy Status:", pregnancyStatus);
+    console.log("Pregnancy Weeks:", pregnancyWeeks);
+
+    if (['female', 'unknown', 'other'].includes(gender) && pregnancyStatus === 'yes' && pregnancyWeeks) {
+        const pregnancyObservation = createObservation('Pregnancy Status', "Pregnant", null);
+        pregnancyObservation.pregnancyWeeks = pregnancyWeeks;
+        observations.push(pregnancyObservation);
+    }
+
+    console.log("Observations Gathered:", observations);
+    return observations;
+}
+
+function createObservation(type, value, unit = null, extraData = {}) {
+    // Define a mapping of observation types to FHIR categories
+    const categoryMap = {
+        "Height": "vital-signs",
+        "Weight": "vital-signs",
+        "Blood Type": "laboratory",
+        "Rhesus Factor": "laboratory",
+        "Pregnancy Status": "social-history"
+    };
+
+    // Determine the category based on the type
+    const categoryCode = categoryMap[type] || "other";
+
+    const observation = {
+        resourceType: "Observation",
+        status: "final",
+        category: [
+            {
                 coding: [
                     {
-                        system: "http://loinc.org",
-                        code: type.toLowerCase().replace(/\s+/g, "-"), // Example: "Height" -> "height"
-                        display: type
+                        system: "http://terminology.hl7.org/CodeSystem/observation-category",
+                        code: categoryCode,
+                        display: categoryCode.replace("-", " ").replace(/\b\w/g, char => char.toUpperCase()) // Capitalize
                     }
                 ]
-            },
-            valueQuantity: value
-                ? {
-                    value: parseFloat(value),
-                    unit: unit,
-                    system: "http://unitsofmeasure.org",
-                    code: unit
+            }
+        ],
+        code: {
+            coding: [
+                {
+                    system: "http://loinc.org",
+                    code: type.toLowerCase().replace(/\s+/g, "-"), // E.g., "Height" -> "height"
+                    display: type
                 }
-                : undefined,
-            effectiveDateTime: new Date().toISOString()
+            ]
+        },
+        effectiveDateTime: new Date().toISOString()
+    };
+
+    // Add value if provided
+    if (value) {
+        observation.valueQuantity = {
+            value: typeof value === "string" ? value : parseFloat(value),
+            unit: unit,
+            system: "http://unitsofmeasure.org",
+            code: unit
         };
     }
+
+    // Merge additional data if provided (e.g., pregnancyWeeks)
+    Object.assign(observation, extraData);
+
+    return observation;
+}
+
+
+    // function createObservation(type, value, unit) {
+    //     return {
+    //         resourceType: "Observation",
+    //         status: "final",
+    //         category: [
+    //             {
+    //                 coding: [
+    //                     {
+    //                         system: "http://terminology.hl7.org/CodeSystem/observation-category",
+    //                         code: "vital-signs",
+    //                         display: "Vital Signs"
+    //                     }
+    //                 ]
+    //             }
+    //         ],
+    //         code: {
+    //             coding: [
+    //                 {
+    //                     system: "http://loinc.org",
+    //                     code: type.toLowerCase().replace(/\s+/g, "-"), // Example: "Height" -> "height"
+    //                     display: type
+    //                 }
+    //             ]
+    //         },
+    //         valueQuantity: value
+    //             ? {
+    //                 value: parseFloat(value),
+    //                 unit: unit,
+    //                 system: "http://unitsofmeasure.org",
+    //                 code: unit
+    //             }
+    //             : undefined,
+    //         effectiveDateTime: new Date().toISOString()
+    //     };
+    // }
 
 });

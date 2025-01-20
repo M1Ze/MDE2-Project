@@ -32,7 +32,7 @@
         <div class="col-md-6">
             <label for="inputSocialSecurityNumber" class="form-label">Social Security Number</label>
             <input type="number" class="form-control" name="socialsecuritynumber"
-                   id="inputSocialSecurityNumber" min="1000" max="9999" required>
+                   id="inputSocialSecurityNumber" min="1000" max="9999" readonly>
             <div class="invalid-feedback">Please enter a valid Austrian Social Security Number.</div>
         </div>
 
@@ -229,12 +229,12 @@
                     <label>Rhesus Factor:</label>
                     <div class="form-check">
                         <input class="form-check-input rhesus-radio" type="radio" name="rhesus_factor" id="rhesus_pos"
-                               value="+">
+                               value="Positive">
                         <label class="form-check-label" for="rhesus_pos">Positive (+)</label>
                     </div>
                     <div class="form-check">
                         <input class="form-check-input rhesus-radio" type="radio" name="rhesus_factor" id="rhesus_neg"
-                               value="-">
+                               value="Negative">
                         <label class="form-check-label" for="rhesus_neg">Negative (-)</label>
                     </div>
                 </div>
