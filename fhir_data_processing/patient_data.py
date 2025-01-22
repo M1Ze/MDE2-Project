@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 
 from fhir.resources.patient import Patient
+from pydantic import json
 
 
 class PatientData:
@@ -69,6 +70,8 @@ class PatientData:
                 ) if contact.telecom else None
                 self.contacts.append({"name": contact_name, "phone": contact_phone})
 
+
+
     def create_fhir(self):
         from fhir.resources.humanname import HumanName
         from fhir.resources.contactpoint import ContactPoint
@@ -122,6 +125,23 @@ class PatientData:
             ] if self.contacts else None,
         )
         return patient_resource.json(indent=4)
+
+    def format_birthdate(self, birthdate):
+        """
+        Converts the input birthdate to ISO 8601 format (YYYY-MM-DD).
+        """
+        try:
+            if "." in birthdate:
+                return datetime.strptime(birthdate, "%d.%m.%Y").strftime("%Y-%m-%d")
+            elif "/" in birthdate:
+                return datetime.strptime(birthdate, "%m/%d/%Y").strftime("%Y-%m-%d")
+            else:
+                return datetime.strptime(birthdate, "%Y-%m-%d").strftime("%Y-%m-%d")
+        except ValueError:
+            raise ValueError(
+                f"Invalid date format for birthdate: {birthdate}. "
+                "Expected formats are DD.MM.YYYY, MM/DD/YYYY, or YYYY-MM-DD."
+            )
 
     def create_fhir_inFilesystem(self, filepath):
         from fhir.resources.humanname import HumanName
@@ -184,19 +204,12 @@ class PatientData:
         with open(full_path, "w") as file:
             file.write(patient_resource.json(indent=4))
 
-    def format_birthdate(self, birthdate):
-        """
-        Converts the input birthdate to ISO 8601 format (YYYY-MM-DD).
-        """
-        try:
-            if "." in birthdate:
-                return datetime.strptime(birthdate, "%d.%m.%Y").strftime("%Y-%m-%d")
-            elif "/" in birthdate:
-                return datetime.strptime(birthdate, "%m/%d/%Y").strftime("%Y-%m-%d")
-            else:
-                return datetime.strptime(birthdate, "%Y-%m-%d").strftime("%Y-%m-%d")
-        except ValueError:
-            raise ValueError(
-                f"Invalid date format for birthdate: {birthdate}. "
-                "Expected formats are DD.MM.YYYY, MM/DD/YYYY, or YYYY-MM-DD."
-            )
+    def populate_from_dict(self, data):
+        self.name = data.get('name')
+        self.birthdate = data.get('birthdate')
+        self.gender = data.get('gender')
+        self.identifier = data.get('identifier')
+        self.address = data.get('address')
+        self.phone = data.get('phone')
+        self.email = data.get('email')
+        self.contacts = data.get('contacts')

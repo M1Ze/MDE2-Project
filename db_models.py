@@ -8,6 +8,7 @@ class Patient(db.Model):
     __tablename__ = 'patient'
     id = db.Column(db.Integer, primary_key=True)
     identifier = db.Column(db.String(100), unique=True, nullable=True)  # Unique patient identifier (SVN)
+    fhir_id = db.Column(db.Integer, nullable=True)  # fhir_id received from the fhire server for the patient resource
     name = db.Column(db.String(200), nullable=False)  # Patient's full name
     pat_data = db.Column(JSON, nullable=True)  # JSON data for FHIR resource
     qr_code = db.Column(BLOB, nullable=False)  # Path to the QR code image
@@ -15,15 +16,18 @@ class Patient(db.Model):
 
     user = db.relationship('User', backref=db.backref('patients', lazy=True))
 
+
 class HealthData(db.Model):
     __tablename__ = 'health_data'
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
+    fhir_id = db.Column(db.Integer, nullable=True)  # fhir_id received from the fhire server for the resource
     data_type = db.Column(db.String(50), nullable=False)  # Type of Oberservation
     data_aqu_datetime = db.Column(db.DateTime, nullable=False) # aquistiton date and Time
     h_data = db.Column(db.Text, nullable=False)  # JSON data for FHIR resource
 
     patient = db.relationship('Patient', backref=db.backref('health_records', lazy=True))
+
 
 class User(db.Model):
     __tablename__ = 'user'
@@ -31,6 +35,7 @@ class User(db.Model):
     email = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     role = db.Column(db.String(50), nullable=False)  # 'patient' or 'staff'
+
 
 
 

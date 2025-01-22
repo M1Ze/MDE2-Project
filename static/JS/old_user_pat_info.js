@@ -350,3 +350,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
+
+// function createObservation(type, value, unit) {
+//     return {
+//         resourceType: "Observation",
+//         status: "final",
+//         category: [
+//             {
+//                 coding: [
+//                     {
+//                         system: "http://terminology.hl7.org/CodeSystem/observation-category",
+//                         code: "vital-signs",
+//                         display: "Vital Signs"
+//                     }
+//                 ]
+//             }
+//         ],
+//         code: {
+//             coding: [
+//                 {
+//                     system: "http://loinc.org",
+//                     code: type.toLowerCase().replace(/\s+/g, "-"), // Example: "Height" -> "height"
+//                     display: type
+//                 }
+//             ]
+//         },
+//         valueQuantity: value
+//             ? {
+//                 value: parseFloat(value),
+//                 unit: unit,
+//                 system: "http://unitsofmeasure.org",
+//                 code: unit
+//             }
+//             : undefined,
+//         effectiveDateTime: new Date().toISOString()
+//     };
+// }

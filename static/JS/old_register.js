@@ -43,11 +43,11 @@
                 localStorage.removeItem('token');
             }
 
-            const registerPatientData = createPatientData();
+            const fhirPatient = createFHIRPatientFromRegisterForm();
             const password = document.querySelector('input[name="password"]').value.trim();
 
             const requestBody = {
-                user: registerPatientData,
+                user: fhirPatient,
                 password: password
             };
 
@@ -81,14 +81,14 @@
         }
     });
 
-function createPatientData() {
+function createFHIRPatientFromRegisterForm() {
     // Extract values from the form
     const givenName = document.querySelector('input[name="given_name"]').value.trim();
     const lastName = document.querySelector('input[name="last_name"]').value.trim();
     const email = document.querySelector('input[name="email"]').value.trim();
     const socialsecuritynumber = document.querySelector('input[name="socialsecuritynumber"]').value.trim();
     const birthdate = document.querySelector('input[name="birthday"]').value.trim();
-    const line = document.querySelector('input[name="address"]').value.trim();
+    const address = document.querySelector('input[name="address"]').value.trim();
     const city = document.querySelector('input[name="city"]').value.trim();
     const postalCode = document.querySelector('input[name="zip"]').value.trim();
     const state = document.querySelector('select[name="state"]').value.trim();
@@ -96,23 +96,55 @@ function createPatientData() {
     const countryCode = document.querySelector('select[name="countryCode"]').value.trim();
     const phoneNumber = document.querySelector('input[name="phonenumber"]').value.trim();
 
-     // Format birthdate as DDMMYYYY
+    // Format birthdate as DDMMYYYY
     const birthdateParts = birthdate.split('-'); // Split date into [YYYY, MM, DD]
-    const formattedBirthdate = `${birthdateParts[2]}.${birthdateParts[1]}.${birthdateParts[0]}`;
-    const ssnFormattedBirthdate = `${birthdateParts[2]}${birthdateParts[1]}${birthdateParts[0]}`;
+    const formattedBirthdate = `${birthdateParts[2]}${birthdateParts[1]}${birthdateParts[0]}`;
 
     // Concatenate SSN with formatted birthdate
-    const formattedSSN = `${socialsecuritynumber}${ssnFormattedBirthdate}`;
+    const formattedSSN = `${socialsecuritynumber}${formattedBirthdate}`;
 
-    // Create a simplified patient data object
+    // Construct the FHIR Patient resource
     return {
-        name: `${givenName} ${lastName}`,
-        birthdate: formattedBirthdate,
-        gender: gender.toLowerCase(),
-        address: `${line}, ${city}, ${state}, ${postalCode}`,
-        phone: `${countryCode}${phoneNumber}`,
-        email: email,
-        identifier: formattedSSN,
+        resourceType: "Patient",
+        identifier: [
+            {
+                system: "urn:oid:1.2.40.0.10.1.4.1", // Example system for SSN
+                value: formattedSSN,
+                type: {
+                    text: "Social Security Number"
+                }
+            }
+        ],
+        name: [
+            {
+                use: "official",
+                family: lastName,
+                given: [givenName]
+            }
+        ],
+        gender: gender.toLowerCase(), // Convert to lowercase as per FHIR spec
+        birthDate: birthdate,
+        telecom: [
+            {
+                system: "email",
+                value: email,
+                use: "home"
+            },
+            {
+                system: "phone",
+                value: `${countryCode} ${phoneNumber}`,
+                use: "mobile"
+            }
+        ],
+        address: [
+            {
+                line: [address],
+                city: city,
+                postalCode: postalCode,
+                state: state,
+                country: "Austria" // Fixed to Austria
+            }
+        ]
     };
 }
 

@@ -1,5 +1,4 @@
 // check_user.js
-//
 
 document.addEventListener('DOMContentLoaded', () => {
         const token = localStorage.getItem('token');
@@ -122,6 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (element) element.value = resolvedValue;
                 }
             }
+            // Call setupPregnancySectionVisibility after fields are populated
+            setupPregnancySectionVisibility();
         }
 
         function populateHealthFields(healthData) {
@@ -180,30 +181,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     // Check for pregnancy status
-                    else if (record.type === 'Pregnancy Status' && record.data?.valueString) {
-                        console.log("Pregnancy Status value:", record.data.valueString);
+                    if (record.type === 'Pregnancy Status' && record.data?.valueQuantity?.value) {
+                        const pregnancyStatus = record.data.valueQuantity.value.toLowerCase(); // Use valueQuantity.value
+                        console.log("Pregnancy Status:", pregnancyStatus);
 
-                        // Select pregnancy status radio buttons
                         const pregnantYes = document.querySelector('#pregnant_yes');
                         const pregnantNo = document.querySelector('#pregnant_no');
+                        const pregnancyWeeksDropdown = document.querySelector('#pregnancy-weeks');
+                        const pregnancyWeeks = document.querySelector('#pregnancyWeeks');
 
-                        if (record.data.valueString.toLowerCase() === 'yes' && pregnantYes) {
+                        if (pregnancyStatus === 'pregnant' && pregnantYes) {
                             pregnantYes.checked = true;
 
                             // Display pregnancy weeks dropdown
-                            const pregnancyWeeksDropdown = document.querySelector('#pregnancy-weeks');
                             if (pregnancyWeeksDropdown) pregnancyWeeksDropdown.style.display = 'block';
 
                             // Set pregnancy weeks if available
-                            const pregnancyWeeks = document.querySelector('#pregnancyWeeks');
                             if (pregnancyWeeks && record.data.pregnancyWeeks) {
                                 pregnancyWeeks.value = record.data.pregnancyWeeks;
                             }
-                        } else if (pregnantNo) {
+                        } else if (pregnancyStatus !== 'pregnant' && pregnantNo) {
                             pregnantNo.checked = true;
 
                             // Hide pregnancy weeks dropdown
-                            const pregnancyWeeksDropdown = document.querySelector('#pregnancy-weeks');
                             if (pregnancyWeeksDropdown) pregnancyWeeksDropdown.style.display = 'none';
                         }
                     }
@@ -212,8 +212,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             )
             ;
+            // Call setupPregnancySectionVisibility after fields are populated
+            setupPregnancySectionVisibility();
         }
 
+        function setupPregnancySectionVisibility() {
+    const genderField = document.getElementById('inputGender');
+    const pregnancySection = document.getElementById('pregnancy-section');
+    const pregnancyDatePicker = document.getElementById('pregnancy-date'); // Date picker section
+    const pregnancyStartDate = document.getElementById('pregnancyStartDate'); // Date picker input
+    const pregnantYes = document.getElementById('pregnant_yes');
+    const pregnantNo = document.getElementById('pregnant_no');
+
+    // Function to toggle the pregnancy section based on gender
+    function togglePregnancySection() {
+        const gender = genderField.value.toLowerCase();
+        if (!['male'].includes(gender)) {
+            pregnancySection.style.display = 'block';
+        } else {
+            pregnancySection.style.display = 'none';
+            pregnantNo.checked = true; // Automatically set status to "No"
+            pregnancyDatePicker.style.display = 'none'; // Hide date picker if section is hidden
+            pregnancyStartDate.value = ""; // Clear the date value
+        }
+    }
+
+    // Function to toggle the date picker based on pregnancy status
+    function togglePregnancyDatePicker() {
+        if (pregnantYes.checked) {
+            pregnancyDatePicker.style.display = 'block';
+        } else {
+            pregnancyDatePicker.style.display = 'none';
+            pregnancyStartDate.value = ""; // Clear the date if "No" is selected
+        }
+    }
+
+    // 1. Immediately call both functions on page load to set initial visibility
+    togglePregnancySection(); // Set visibility of pregnancy section based on pre-selected gender
+    togglePregnancyDatePicker(); // Set visibility of date picker based on pre-selected pregnancy status
+
+    // 2. Set up event listeners for user interactions
+    genderField.addEventListener('change', () => {
+        togglePregnancySection();
+        togglePregnancyDatePicker(); // Ensure date picker is hidden if the pregnancy section is hidden
+    });
+    pregnantYes.addEventListener('change', togglePregnancyDatePicker);
+    pregnantNo.addEventListener('change', togglePregnancyDatePicker);
+}
 
     }
 )
