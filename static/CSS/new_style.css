@@ -79,12 +79,31 @@
     color: white; /* Keep text white on hover */
 }
 
-/* Increase size of the checkbox */
-.form-check-input-resus {
-    width: 30px;
-    height: 30px;
+/* Ensure the page covers the full viewport height */
+html, body {
+    height: 100%; /* Full height */
+    margin: 0;
+    padding: 0;
 }
 
+/* Main flexbox layout for the page */
+.d-flex {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ensure the page spans the viewport */
+}
+
+/* Flex-grow ensures content fills space above footer */
+.flex-grow-1 {
+    flex-grow: 1;
+}
+
+/* Footer styling to ensure full width and separation */
+footer {
+    width: 100%;
+    background-color: #f8f9fa; /* Light grey background */
+    border-top: 1px solid #dee2e6; /* Subtle top border */
+}
 
 /*.navbar-brand {*/
 /*    font-size: 3rem;*/
