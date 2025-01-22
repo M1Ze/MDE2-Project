@@ -1,29 +1,28 @@
-<!--loginPage.html-->
 {% extends "base.html" %}
 
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div class="container d-flex justify-content-center mt-5">
-        <div class="col-md-6">
-            <h1 class="text-center">Login</h1>
-            <form id="login-form" method="post" action="/login" class="needs-validation" novalidate>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email address</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
-                    <div class="invalid-feedback">Please enter a valid email address.</div>
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" minlength="8" required>
-                    <div class="invalid-feedback">Password must be at least 8 characters long.</div>
-                </div>
-                <button type="submit" class="btn btn-custom w-100">Login</button>
-            </form>
-            <div class="text-center mt-3">
-                <a href="/register" class="btn btn-secondary">Register here</a>
+<div class="login-container">
+    <div class="col-md-6 login-card">
+        <h1 class="text-center">Login</h1>
+        <form id="login-form" method="post" action="/login" class="needs-validation" novalidate>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+                <div class="invalid-feedback">Please enter a valid email address.</div>
             </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" minlength="8" required>
+                <div class="invalid-feedback">Password must be at least 8 characters long.</div>
+            </div>
+            <button type="submit" class="btn btn-custom w-100">Login</button>
+        </form>
+        <div class="text-center mt-3">
+            <a href="/register" class="btn btn-secondary">Register here</a>
         </div>
     </div>
+</div>
 <script src="/static/JS/login.js" defer></script>
 {% endblock %}

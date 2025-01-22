@@ -105,6 +105,24 @@ footer {
     border-top: 1px solid #dee2e6; /* Subtle top border */
 }
 
+/* Card styling for the login form */
+.login-card {
+    padding: 2rem;
+    border: 1px solid #ddd; /* Optional: light border */
+    border-radius: 8px;
+    background-color: #fff; /* White background */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Flexbox layout for centering */
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh; /* Full viewport height */
+    background-color: #f4f4f9; /* Light background for login page */
+}
+
 /*.navbar-brand {*/
 /*    font-size: 3rem;*/
 /*    border: 7px solid #0d6efd;*/
