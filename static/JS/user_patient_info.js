@@ -1,15 +1,15 @@
 // user_patient_info.js
 
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-        const dd = String(today.getDate()).padStart(2, '0'); // Add leading zero if necessary
+const today = new Date();
+const yyyy = today.getFullYear();
+const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+const dd = String(today.getDate()).padStart(2, '0'); // Add leading zero if necessary
 
-        const formattedDate = `${yyyy}-${mm}-${dd}`; // Format as YYYY-MM-DD
+const formattedDate = `${yyyy}-${mm}-${dd}`; // Format as YYYY-MM-DD
 
-        // Set max attribute for the date input
-        document.getElementById('inputBirthday').setAttribute('max', formattedDate);
-        document.getElementById('pregnancyStartDate').setAttribute('max', formattedDate);
+// Set max attribute for the date input
+document.getElementById('inputBirthday').setAttribute('max', formattedDate);
+document.getElementById('pregnancyStartDate').setAttribute('max', formattedDate);
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('.needs-validation');
@@ -74,48 +74,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     function setupPregnancySectionVisibility() {
-    const genderField = document.getElementById('inputGender');
-    const pregnancySection = document.getElementById('pregnancy-section');
-    const pregnancyDatePicker = document.getElementById('pregnancy-date'); // Date picker section
-    const pregnancyStartDate = document.getElementById('pregnancyStartDate'); // Date picker input
-    const pregnantYes = document.getElementById('pregnant_yes');
-    const pregnantNo = document.getElementById('pregnant_no');
+        const genderField = document.getElementById('inputGender');
+        const pregnancySection = document.getElementById('pregnancy-section');
+        const pregnancyDatePicker = document.getElementById('pregnancy-date'); // Date picker section
+        const pregnancyStartDate = document.getElementById('pregnancyStartDate'); // Date picker input
+        const pregnantYes = document.getElementById('pregnant_yes');
+        const pregnantNo = document.getElementById('pregnant_no');
 
-    // Function to toggle the pregnancy section based on gender
-    function togglePregnancySection() {
-        const gender = genderField.value.toLowerCase();
-        if (!['male'].includes(gender)) {
-            pregnancySection.style.display = 'block';
-        } else {
-            pregnancySection.style.display = 'none';
-            pregnantNo.checked = true; // Automatically set status to "No"
-            pregnancyDatePicker.style.display = 'none'; // Hide date picker if section is hidden
-            pregnancyStartDate.value = ""; // Clear the date value
+        // Function to toggle the pregnancy section based on gender
+        function togglePregnancySection() {
+            const gender = genderField.value.toLowerCase();
+            if (!['male'].includes(gender)) {
+                pregnancySection.style.display = 'block';
+            } else {
+                pregnancySection.style.display = 'none';
+                pregnantNo.checked = true; // Automatically set status to "No"
+                pregnancyDatePicker.style.display = 'none'; // Hide date picker if section is hidden
+                pregnancyStartDate.value = ""; // Clear the date value
+            }
         }
-    }
 
-    // Function to toggle the date picker based on pregnancy status
-    function togglePregnancyDatePicker() {
-        if (pregnantYes.checked) {
-            pregnancyDatePicker.style.display = 'block';
-        } else {
-            pregnancyDatePicker.style.display = 'none';
-            pregnancyStartDate.value = ""; // Clear the date if "No" is selected
+        // Function to toggle the date picker based on pregnancy status
+        function togglePregnancyDatePicker() {
+            if (pregnantYes.checked) {
+                pregnancyDatePicker.style.display = 'block';
+            } else {
+                pregnancyDatePicker.style.display = 'none';
+                pregnancyStartDate.value = ""; // Clear the date if "No" is selected
+            }
         }
+
+        // 1. Immediately call both functions on page load to set initial visibility
+        togglePregnancySection(); // Set visibility of pregnancy section based on pre-selected gender
+        togglePregnancyDatePicker(); // Set visibility of date picker based on pre-selected pregnancy status
+
+        // 2. Set up event listeners for user interactions
+        genderField.addEventListener('change', () => {
+            togglePregnancySection();
+            togglePregnancyDatePicker(); // Ensure date picker is hidden if the pregnancy section is hidden
+        });
+        pregnantYes.addEventListener('change', togglePregnancyDatePicker);
+        pregnantNo.addEventListener('change', togglePregnancyDatePicker);
     }
-
-    // 1. Immediately call both functions on page load to set initial visibility
-    togglePregnancySection(); // Set visibility of pregnancy section based on pre-selected gender
-    togglePregnancyDatePicker(); // Set visibility of date picker based on pre-selected pregnancy status
-
-    // 2. Set up event listeners for user interactions
-    genderField.addEventListener('change', () => {
-        togglePregnancySection();
-        togglePregnancyDatePicker(); // Ensure date picker is hidden if the pregnancy section is hidden
-    });
-    pregnantYes.addEventListener('change', togglePregnancyDatePicker);
-    pregnantNo.addEventListener('change', togglePregnancyDatePicker);
-}
 
     function setupLockButtons(buttonId, selectors) {
         const lockButton = document.getElementById(buttonId);
@@ -186,51 +186,56 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createPatientData() {
-    // Extract values from the form
-    const givenName = document.querySelector('input[name="given_name"]').value.trim();
-    const lastName = document.querySelector('input[name="last_name"]').value.trim();
-    const email = document.querySelector('input[name="email"]').value.trim();
-    const socialsecuritynumber = document.querySelector('input[name="socialsecuritynumber"]').value.trim();
-    const birthdate = document.querySelector('input[name="birthday"]').value.trim();
-    const line = document.querySelector('input[name="address"]').value.trim();
-    const city = document.querySelector('input[name="city"]').value.trim();
-    const postalCode = document.querySelector('input[name="zip"]').value.trim();
-    const state = document.querySelector('select[name="state"]').value.trim();
-    const gender = document.querySelector('select[name="gender"]').value.trim();
-    const countryCode = document.querySelector('select[name="countryCode"]').value.trim();
-    const phoneNumber = document.querySelector('input[name="phonenumber"]').value.trim();
+        // Extract values from the form
+        const givenName = document.querySelector('input[name="given_name"]').value.trim();
+        const lastName = document.querySelector('input[name="last_name"]').value.trim();
+        const email = document.querySelector('input[name="email"]').value.trim();
+        const socialsecuritynumber = document.querySelector('input[name="socialsecuritynumber"]').value.trim();
+        const birthdate = document.querySelector('input[name="birthday"]').value.trim();
+        const line = document.querySelector('input[name="address"]').value.trim();
+        const city = document.querySelector('input[name="city"]').value.trim();
+        const postalCode = document.querySelector('input[name="zip"]').value.trim();
+        const state = document.querySelector('select[name="state"]').value.trim();
+        const gender = document.querySelector('select[name="gender"]').value.trim();
+        const countryCode = document.querySelector('select[name="countryCode"]').value.trim();
+        const phoneNumber = document.querySelector('input[name="phonenumber"]').value.trim();
 
-    // Contact fields
-    const contactGivenName = document.querySelector('input[name="contact_given_name"]').value.trim();
-    const contactLastName = document.querySelector('input[name="contact_last_name"]').value.trim();
-    const contactCountryCode = document.querySelector('select[name="contactCountryCode"]').value.trim();
-    const contactPhoneNumber = document.querySelector('input[name="contact_phone"]').value.trim();
+        // Contact fields
+        const contactGivenName = document.querySelector('input[name="contact_given_name"]').value.trim();
+        const contactLastName = document.querySelector('input[name="contact_last_name"]').value.trim();
+        const contactCountryCode = document.querySelector('select[name="contactCountryCode"]').value.trim();
+        const contactPhoneNumber = document.querySelector('input[name="contact_phone"]').value.trim();
 
-     // Format birthdate as DDMMYYYY
-    const birthdateParts = birthdate.split('-'); // Split date into [YYYY, MM, DD]
-    const formattedBirthdate = `${birthdateParts[2]}.${birthdateParts[1]}.${birthdateParts[0]}`;
-    const ssnFormattedBirthdate = `${birthdateParts[2]}${birthdateParts[1]}${birthdateParts[0]}`;
+        // Format birthdate as DDMMYYYY
+        const birthdateParts = birthdate.split('-'); // Split date into [YYYY, MM, DD]
+        const formattedBirthdate = `${birthdateParts[2]}.${birthdateParts[1]}.${birthdateParts[0]}`;
+        const ssnFormattedBirthdate = `${birthdateParts[2]}${birthdateParts[1]}${birthdateParts[0]}`;
 
-    // Concatenate SSN with formatted birthdate
-    const formattedSSN = `${socialsecuritynumber}${ssnFormattedBirthdate}`;
+        // Concatenate SSN with formatted birthdate
+        const formattedSSN = `${socialsecuritynumber}${ssnFormattedBirthdate}`;
 
-    // Create a simplified patient data object
-    return {
-        name: `${givenName} ${lastName}`,
-        birthdate: formattedBirthdate,
-        gender: gender.toLowerCase(),
-        address: `${line}, ${city}, ${state}, ${postalCode}`,
-        phone: `${countryCode} ${phoneNumber}`,
-        email: email,
-        identifier: formattedSSN,
-        contacts: [
-            {
+        // Prepare contacts array
+        const contacts = [];
+        if (contactGivenName && contactLastName && contactPhoneNumber) {
+            // Add contact only if all fields are valid
+            contacts.push({
                 name: `${contactGivenName} ${contactLastName}`,
                 phone: `${contactCountryCode} ${contactPhoneNumber}`
-            }
-        ]
-    };
-}
+            });
+        }
+
+        // Create a simplified patient data object
+        return {
+            name: `${givenName} ${lastName}`,
+            birthdate: formattedBirthdate,
+            gender: gender.toLowerCase(),
+            address: `${line}, ${city}, ${state}, ${postalCode}`,
+            phone: `${countryCode} ${phoneNumber}`,
+            email: email,
+            identifier: formattedSSN,
+            contacts // Deliver only if the contact array has entries
+        };
+    }
 
     function createFHIRPatient() {
         const firstName = document.querySelector('[name="given_name"]').value.trim();
@@ -294,6 +299,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Gather Observations Function
+
+
     function gatherObservations() {
         const observations = [];
 
@@ -341,59 +348,84 @@ document.addEventListener('DOMContentLoaded', () => {
         return observations;
     }
 
-    function createObservation(type, value, unit = null, extraData = {}) {
-        // Define a mapping of observation types to FHIR categories
-        const categoryMap = {
-            "Height": "vital-signs",
-            "Weight": "vital-signs",
-            "Blood Type": "laboratory",
-            "Rhesus Factor": "laboratory",
-            "Pregnancy Status": "social-history"
-        };
+    function createObservationData() {
+    // Extract height
+    const heightValue = document.querySelector('input[name="height"]').value.trim();
+    const heightUnit = document.querySelector('select[name="height_unit"]').value.trim();
 
-        // Determine the category based on the type
-        const categoryCode = categoryMap[type] || "other";
+    // Extract weight
+    const weightValue = document.querySelector('input[name="weight"]').value.trim();
+    const weightUnit = document.querySelector('select[name="weight_unit"]').value.trim();
 
-        const observation = {
-            resourceType: "Observation",
-            status: "final",
-            category: [
-                {
-                    coding: [
-                        {
-                            system: "http://terminology.hl7.org/CodeSystem/observation-category",
-                            code: categoryCode,
-                            display: categoryCode.replace("-", " ").replace(/\b\w/g, char => char.toUpperCase()) // Capitalize
-                        }
-                    ]
-                }
-            ],
-            code: {
-                coding: [
-                    {
-                        system: "http://loinc.org",
-                        code: type.toLowerCase().replace(/\s+/g, "-"), // E.g., "Height" -> "height"
-                        display: type
-                    }
-                ]
-            },
-            effectiveDateTime: new Date().toISOString()
-        };
+    // Extract blood type
+    const bloodType = document.querySelector('input[name="blood_type"]:checked')?.value;
 
-        // Add value if provided
-        if (value) {
-            observation.valueQuantity = {
-                value: typeof value === "string" ? value : parseFloat(value),
-                unit: unit,
-                system: "http://unitsofmeasure.org",
-                code: unit
-            };
-        }
+    // Extract rhesus factor
+    const rhesusFactor = document.querySelector('input[name="rhesus_factor"]:checked')?.value;
 
-        // Merge additional data if provided (e.g., pregnancyWeeks)
-        Object.assign(observation, extraData);
+    // Extract pregnancy status
+    const pregnancyStatus = document.querySelector('input[name="pregnancy_status"]:checked')?.value;
+    let pregnancyStartDate = null;
 
-        return observation;
+    if (pregnancyStatus === 'yes') {
+        pregnancyStartDate = document.querySelector('input[name="pregnancy_start_date"]').value.trim();
     }
+
+    // Create observation data array
+    const observations = [];
+
+    // Add height observation if valid
+    if (heightValue && heightUnit) {
+        observations.push({
+            identifier: `obs-8302-2`, // LOINC code for height
+            type: "Height",
+            data: `${heightValue} ${heightUnit}`,
+            data_aqu_datetime: new Date().toISOString() // Current timestamp
+        });
+    }
+
+    // Add weight observation if valid
+    if (weightValue && weightUnit) {
+        observations.push({
+            identifier: `obs-29463-7`, // LOINC code for weight
+            type: "Weight",
+            data: `${weightValue} ${weightUnit}`,
+            data_aqu_datetime: new Date().toISOString() // Current timestamp
+        });
+    }
+
+    // Add blood type observation if valid
+    if (bloodType) {
+        observations.push({
+            identifier: `obs-883-9`, // LOINC code for blood type
+            type: "Blood Type",
+            data: bloodType,
+            data_aqu_datetime: new Date().toISOString() // Current timestamp
+        });
+    }
+
+    // Add rhesus factor observation if valid
+    if (rhesusFactor) {
+        observations.push({
+            identifier: `obs-7799-0`, // LOINC code for rhesus factor
+            type: "Rhesus Factor",
+            data: rhesusFactor,
+            data_aqu_datetime: new Date().toISOString() // Current timestamp
+        });
+    }
+
+    // Add pregnancy observation if pregnant
+    if (pregnancyStatus === 'yes' && pregnancyStartDate) {
+        observations.push({
+            identifier: `obs-82810-3`, // LOINC code for pregnancy status
+            type: "Pregnancy",
+            data: "Pregnant",
+            data_aqu_datetime: pregnancyStartDate // Use the selected pregnancy start date
+        });
+    }
+
+    // Return the observations array
+    return observations;
+}
 
 });

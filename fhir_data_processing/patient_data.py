@@ -70,8 +70,6 @@ class PatientData:
                 ) if contact.telecom else None
                 self.contacts.append({"name": contact_name, "phone": contact_phone})
 
-
-
     def create_fhir(self):
         from fhir.resources.humanname import HumanName
         from fhir.resources.contactpoint import ContactPoint
@@ -204,12 +202,24 @@ class PatientData:
         with open(full_path, "w") as file:
             file.write(patient_resource.json(indent=4))
 
+
     def populate_from_dict(self, data):
-        self.name = data.get('name')
-        self.birthdate = data.get('birthdate')
-        self.gender = data.get('gender')
-        self.identifier = data.get('identifier')
-        self.address = data.get('address')
-        self.phone = data.get('phone')
-        self.email = data.get('email')
-        self.contacts = data.get('contacts')
+        self.name = data.get('name', '')
+        self.birthdate = data.get('birthdate', '')
+        self.gender = data.get('gender', '')
+        self.identifier = data.get('identifier', '')
+        self.address = data.get('address', '')
+        self.phone = data.get('phone', '')
+        self.email = data.get('email', '')
+
+        # Ensure contacts is always a list
+        self.contacts = []
+        contacts = data.get('contacts', [])
+        if isinstance(contacts, list):  # Only process if it's a list
+            for contact in contacts:
+                name = contact.get('name', '').strip()
+                phone = contact.get('phone', '').strip()
+                if name or phone:  # Only add non-empty contacts
+                    self.contacts.append({"name": name, "phone": phone})
+        else:
+            raise ValueError("Contacts field must be a list.")
