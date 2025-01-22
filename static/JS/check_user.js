@@ -104,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     selector: '[name="socialsecuritynumber"]',
                     value: () => (patient.identifier ? patient.identifier.slice(0, 4) : '')
                 },
+
             }
 
             // Populate form fields using the field map

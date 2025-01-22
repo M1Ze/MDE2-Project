@@ -64,9 +64,65 @@ def index():
 def userPatientInfo():
     return render_template('user_patient_info.html')
 
-
 @app.route('/savePatientData', methods=['POST'])
 def save_patient_data():
+    # Token validation remains intact
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({'status': 'error', 'message': 'No token provided'}), 401
+
+    token = auth_header.split(" ")[1]
+    token_check = check_token(token)
+    if not token_check or 'user_id' not in token_check:
+        return jsonify({'status': 'error', 'message': 'Invalid token'}), 401
+
+    user_id = token_check['user_id']
+
+    try:
+        # Parse the request JSON
+        data = request.get_json()
+        if not data:
+            return jsonify({'status': 'error', 'message': 'No data received'}), 400
+
+        # Extract patient data
+        patient_data_json = data.get('patient')
+        if not patient_data_json or not isinstance(patient_data_json, dict):
+            return jsonify({'status': 'error', 'message': 'Invalid or missing patient data'}), 400
+
+        # Populate the PatientData object
+        patient_data = PatientData()
+        patient_data.populate_from_dict(patient_data_json)
+        print(patient_data.contacts)
+        patient_fhir_resource=patient_data.create_fhir()
+        print('here')
+
+        # Fetch the patient using the identifier
+        identifier_list = patient_data_json.get('identifier', [])
+        identifier_value = identifier_list[0].get('value') if identifier_list else None
+        if not identifier_value:
+            return jsonify({'status': 'error', 'message': 'Missing identifier value'}), 400
+
+        patient = Patient.query.filter_by(identifier=identifier_value).first()
+        if not patient:
+            return jsonify({'status': 'error', 'message': 'Patient not found'}), 404
+
+        if patient.user_id != user_id:
+            return jsonify({'status': 'error', 'message': 'Unauthorized access to patient data'}), 403
+
+        # Update patient record
+        patient.name = patient_data.name or patient.name
+        patient.pat_data = json.loads(patient_fhir_resource)  # Save the updated FHIR JSON
+
+        db.session.commit()  # Save changes
+        return jsonify({'status': 'success', 'message': 'Patient data saved successfully'}), 200
+
+    except Exception as e:
+        app.logger.error(f"Error saving patient data: {str(e)}")
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': 'An error occurred while saving patient data.'}), 500
+
+@app.route('/savePatientData1', methods=['POST'])
+def save_patient_data1():
     # Extract user ID from token
     auth_header = request.headers.get('Authorization')
     if not auth_header or not auth_header.startswith("Bearer "):
@@ -197,6 +253,7 @@ def register():
         #muss nochmal überarbeiten
         patient_data = PatientData()
         patient_data.populate_from_dict(patient_register_data)
+        print(patient_data)
 
         patient_fhir_resource=patient_data.create_fhir()
 
@@ -334,150 +391,150 @@ if __name__ == '__main__':
 
 
 
-@app.route('/getPatientInformation1', methods=['GET'])
-def get_patient_information1():
-    auth_header = request.headers.get('Authorization')
-    if not auth_header or not auth_header.startswith("Bearer "):
-        return jsonify({'status': 'error', 'message': 'No token provided'}), 401
-
-    token = auth_header.split(" ")[1]
-    token_check = check_token(token)  # Your token validation logic
-    if not token_check or 'user_id' not in token_check:
-        return jsonify({'status': 'error', 'message': 'Invalid token'}), 401
-
-    user_id = token_check['user_id']
-    patient = Patient.query.filter_by(user_id=user_id).first()
-    if not patient:
-        return jsonify({'status': 'error', 'message': 'Patient not found'}), 404
-
-    # Use PatientData to process the patient resource
-    patient_data = PatientData()
-    patient_data.extract_data(filepath=None, json_string=json.dumps(patient.pat_data))
-
-    # Serialize and return the entire PatientData object
-    return jsonify({'status': 'success', 'patient': patient_data.__dict__})
-
-@app.route('/register1', methods=['GET', 'POST'])
-def register1():
-    if request.method == 'GET':
-        return render_template('register.html')
-
-    if request.method == 'POST':
-        data = request.get_json()
-        patient_fhire_resource = data.get('user')  # Extract the FHIR Patient resource
-        password = data.get('password')
-
-        # Extract fields from the FHIR resource
-        if patient_fhire_resource:
-            email = next(
-                (telecom.get('value') for telecom in patient_fhire_resource.get('telecom', [])
-                 if telecom.get('system') == 'email'),
-                None
-            )
-            name = patient_fhire_resource.get('name', [{}])[0]
-            given_name = name.get('given', [''])[0]
-            last_name = name.get('family', '')
-            identifier = patient_fhire_resource.get('identifier', [{}])[0]
-            social_security_number = identifier.get('value')
-
-            # Check for required fields
-            if not email or not password:
-                return jsonify({'status': 'error', 'message': 'Email or password is missing'}), 500
-
-            if User.query.filter_by(email=email).first():
-                return jsonify({'status': 'error', 'message': 'Email already registered'}), 501
-
-            hashed_password = generate_password_hash(password)
-            new_user = User(email=email, password=hashed_password, role='User')
-            new_patient = Patient(
-                name=f"{given_name} {last_name}",
-                identifier=social_security_number,
-                qr_code=generate_qr_code_binary(social_security_number),
-                pat_data=patient_fhire_resource  # Save the entire FHIR Patient resource
-            )
-            try:
-                db.session.add(new_user)
-                db.session.flush()  # Ensures `new_user.id` is populated without committing yet
-
-                new_patient.user_id = new_user.id
-                db.session.add(new_patient)
-                db.session.commit()
-                return jsonify({'status': 'success', 'message': 'User registered'}), 200
-            except Exception as e:
-                db.session.rollback()
-                return jsonify({'status': 'error', 'message': str(e)}), 500
-        else:
-            return jsonify({'status': 'error', 'message': 'Invalid request'}), 400
-
-
-@app.route('/savePatientData1', methods=['POST'])
-def save_patient_data1():
-    # Extract user ID from token
-    auth_header = request.headers.get('Authorization')
-    if not auth_header or not auth_header.startswith("Bearer "):
-        return jsonify({'status': 'error', 'message': 'No token provided'}), 401
-
-    token = auth_header.split(" ")[1]
-    token_check = check_token(token)
-    if not token_check or 'user_id' not in token_check:
-        return jsonify({'status': 'error', 'message': 'Invalid token'}), 401
-
-    user_id = token_check['user_id']
-
-    try:
-        # Parse incoming JSON request
-        data = request.get_json()
-        if not data:
-            return jsonify({'status': 'error', 'message': 'No data received'}), 400
-
-        # Extract patient data
-        patient_data = data.get('patient')
-        if not patient_data or not isinstance(patient_data, dict):
-            return jsonify({'status': 'error', 'message': 'Invalid or missing patient data'}), 400
-
-        # Extract identifier value
-        identifier_list = patient_data.get('identifier', [])
-        identifier_value = identifier_list[0].get('value') if identifier_list else None
-        if not identifier_value:
-            return jsonify({'status': 'error', 'message': 'Missing identifier value'}), 400
-
-        # Fetch patient from the database
-        patient = Patient.query.filter_by(identifier=identifier_value).first()
-        if not patient:
-            return jsonify({'status': 'error', 'message': 'Patient not found'}), 404
-
-        if patient.user_id != user_id:
-            return jsonify({'status': 'error', 'message': 'Unauthorized access to patient data'}), 403
-
-        # Update patient data
-        patient.name = f"{patient_data.get('name', [{'family': patient.name.split()[1]}])[0]['given'][0]} {patient_data.get('name', [{'family': patient.name.split()[1]}])[0]['family']}" or patient.name
-        patient.pat_data = patient_data  # Save the updated FHIR JSON
-
-        # Extract and log observations
-        observations = data.get('observations', [])
-        if not isinstance(observations, list):
-            return jsonify({'status': 'error', 'message': 'Invalid observations format'}), 400
-
-        print("Received Observations:")
-        for obs in observations:
-            print(json.dumps(obs, indent=2))
-
-        # Placeholder for saving observations to the database
-        print(f"Patient {patient.name} has {len(observations)} new observations.")
-
-        # Commit updated patient data
-        db.session.commit()
-
-        return jsonify({
-            'status': 'success',
-            'message': f'Patient data updated with {len(observations)} observations',
-            'observations': observations
-        }), 200
-
-    except Exception as e:
-        print("Error processing data:", str(e))
-        db.session.rollback()
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+# @app.route('/getPatientInformation1', methods=['GET'])
+# def get_patient_information1():
+#     auth_header = request.headers.get('Authorization')
+#     if not auth_header or not auth_header.startswith("Bearer "):
+#         return jsonify({'status': 'error', 'message': 'No token provided'}), 401
+#
+#     token = auth_header.split(" ")[1]
+#     token_check = check_token(token)  # Your token validation logic
+#     if not token_check or 'user_id' not in token_check:
+#         return jsonify({'status': 'error', 'message': 'Invalid token'}), 401
+#
+#     user_id = token_check['user_id']
+#     patient = Patient.query.filter_by(user_id=user_id).first()
+#     if not patient:
+#         return jsonify({'status': 'error', 'message': 'Patient not found'}), 404
+#
+#     # Use PatientData to process the patient resource
+#     patient_data = PatientData()
+#     patient_data.extract_data(filepath=None, json_string=json.dumps(patient.pat_data))
+#
+#     # Serialize and return the entire PatientData object
+#     return jsonify({'status': 'success', 'patient': patient_data.__dict__})
+#
+# @app.route('/register1', methods=['GET', 'POST'])
+# def register1():
+#     if request.method == 'GET':
+#         return render_template('register.html')
+#
+#     if request.method == 'POST':
+#         data = request.get_json()
+#         patient_fhire_resource = data.get('user')  # Extract the FHIR Patient resource
+#         password = data.get('password')
+#
+#         # Extract fields from the FHIR resource
+#         if patient_fhire_resource:
+#             email = next(
+#                 (telecom.get('value') for telecom in patient_fhire_resource.get('telecom', [])
+#                  if telecom.get('system') == 'email'),
+#                 None
+#             )
+#             name = patient_fhire_resource.get('name', [{}])[0]
+#             given_name = name.get('given', [''])[0]
+#             last_name = name.get('family', '')
+#             identifier = patient_fhire_resource.get('identifier', [{}])[0]
+#             social_security_number = identifier.get('value')
+#
+#             # Check for required fields
+#             if not email or not password:
+#                 return jsonify({'status': 'error', 'message': 'Email or password is missing'}), 500
+#
+#             if User.query.filter_by(email=email).first():
+#                 return jsonify({'status': 'error', 'message': 'Email already registered'}), 501
+#
+#             hashed_password = generate_password_hash(password)
+#             new_user = User(email=email, password=hashed_password, role='User')
+#             new_patient = Patient(
+#                 name=f"{given_name} {last_name}",
+#                 identifier=social_security_number,
+#                 qr_code=generate_qr_code_binary(social_security_number),
+#                 pat_data=patient_fhire_resource  # Save the entire FHIR Patient resource
+#             )
+#             try:
+#                 db.session.add(new_user)
+#                 db.session.flush()  # Ensures `new_user.id` is populated without committing yet
+#
+#                 new_patient.user_id = new_user.id
+#                 db.session.add(new_patient)
+#                 db.session.commit()
+#                 return jsonify({'status': 'success', 'message': 'User registered'}), 200
+#             except Exception as e:
+#                 db.session.rollback()
+#                 return jsonify({'status': 'error', 'message': str(e)}), 500
+#         else:
+#             return jsonify({'status': 'error', 'message': 'Invalid request'}), 400
+#
+#
+# @app.route('/savePatientData1', methods=['POST'])
+# def save_patient_data1():
+#     # Extract user ID from token
+#     auth_header = request.headers.get('Authorization')
+#     if not auth_header or not auth_header.startswith("Bearer "):
+#         return jsonify({'status': 'error', 'message': 'No token provided'}), 401
+#
+#     token = auth_header.split(" ")[1]
+#     token_check = check_token(token)
+#     if not token_check or 'user_id' not in token_check:
+#         return jsonify({'status': 'error', 'message': 'Invalid token'}), 401
+#
+#     user_id = token_check['user_id']
+#
+#     try:
+#         # Parse incoming JSON request
+#         data = request.get_json()
+#         if not data:
+#             return jsonify({'status': 'error', 'message': 'No data received'}), 400
+#
+#         # Extract patient data
+#         patient_data = data.get('patient')
+#         if not patient_data or not isinstance(patient_data, dict):
+#             return jsonify({'status': 'error', 'message': 'Invalid or missing patient data'}), 400
+#
+#         # Extract identifier value
+#         identifier_list = patient_data.get('identifier', [])
+#         identifier_value = identifier_list[0].get('value') if identifier_list else None
+#         if not identifier_value:
+#             return jsonify({'status': 'error', 'message': 'Missing identifier value'}), 400
+#
+#         # Fetch patient from the database
+#         patient = Patient.query.filter_by(identifier=identifier_value).first()
+#         if not patient:
+#             return jsonify({'status': 'error', 'message': 'Patient not found'}), 404
+#
+#         if patient.user_id != user_id:
+#             return jsonify({'status': 'error', 'message': 'Unauthorized access to patient data'}), 403
+#
+#         # Update patient data
+#         patient.name = f"{patient_data.get('name', [{'family': patient.name.split()[1]}])[0]['given'][0]} {patient_data.get('name', [{'family': patient.name.split()[1]}])[0]['family']}" or patient.name
+#         patient.pat_data = patient_data  # Save the updated FHIR JSON
+#
+#         # Extract and log observations
+#         observations = data.get('observations', [])
+#         if not isinstance(observations, list):
+#             return jsonify({'status': 'error', 'message': 'Invalid observations format'}), 400
+#
+#         print("Received Observations:")
+#         for obs in observations:
+#             print(json.dumps(obs, indent=2))
+#
+#         # Placeholder for saving observations to the database
+#         print(f"Patient {patient.name} has {len(observations)} new observations.")
+#
+#         # Commit updated patient data
+#         db.session.commit()
+#
+#         return jsonify({
+#             'status': 'success',
+#             'message': f'Patient data updated with {len(observations)} observations',
+#             'observations': observations
+#         }), 200
+#
+#     except Exception as e:
+#         print("Error processing data:", str(e))
+#         db.session.rollback()
+#         return jsonify({'status': 'error', 'message': str(e)}), 500
 # @app.route('/getPatientInformation2', methods=['GET'])
 # def get_patient_information2():
 #     auth_header = request.headers.get('Authorization')

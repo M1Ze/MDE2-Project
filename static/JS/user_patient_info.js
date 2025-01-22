@@ -38,7 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const patient = createFHIRPatient();
+        const patient = createPatientData();
+        console.log(patient);
         const observations = gatherObservations();
 
         // Build request payload
@@ -184,6 +185,52 @@ document.addEventListener('DOMContentLoaded', () => {
         return isValid;
     }
 
+    function createPatientData() {
+    // Extract values from the form
+    const givenName = document.querySelector('input[name="given_name"]').value.trim();
+    const lastName = document.querySelector('input[name="last_name"]').value.trim();
+    const email = document.querySelector('input[name="email"]').value.trim();
+    const socialsecuritynumber = document.querySelector('input[name="socialsecuritynumber"]').value.trim();
+    const birthdate = document.querySelector('input[name="birthday"]').value.trim();
+    const line = document.querySelector('input[name="address"]').value.trim();
+    const city = document.querySelector('input[name="city"]').value.trim();
+    const postalCode = document.querySelector('input[name="zip"]').value.trim();
+    const state = document.querySelector('select[name="state"]').value.trim();
+    const gender = document.querySelector('select[name="gender"]').value.trim();
+    const countryCode = document.querySelector('select[name="countryCode"]').value.trim();
+    const phoneNumber = document.querySelector('input[name="phonenumber"]').value.trim();
+
+    // Contact fields
+    const contactGivenName = document.querySelector('input[name="contact_given_name"]').value.trim();
+    const contactLastName = document.querySelector('input[name="contact_last_name"]').value.trim();
+    const contactCountryCode = document.querySelector('select[name="contactCountryCode"]').value.trim();
+    const contactPhoneNumber = document.querySelector('input[name="contact_phone"]').value.trim();
+
+     // Format birthdate as DDMMYYYY
+    const birthdateParts = birthdate.split('-'); // Split date into [YYYY, MM, DD]
+    const formattedBirthdate = `${birthdateParts[2]}.${birthdateParts[1]}.${birthdateParts[0]}`;
+    const ssnFormattedBirthdate = `${birthdateParts[2]}${birthdateParts[1]}${birthdateParts[0]}`;
+
+    // Concatenate SSN with formatted birthdate
+    const formattedSSN = `${socialsecuritynumber}${ssnFormattedBirthdate}`;
+
+    // Create a simplified patient data object
+    return {
+        name: `${givenName} ${lastName}`,
+        birthdate: formattedBirthdate,
+        gender: gender.toLowerCase(),
+        address: `${line}, ${city}, ${state}, ${postalCode}`,
+        phone: `${countryCode} ${phoneNumber}`,
+        email: email,
+        identifier: formattedSSN,
+        contacts: [
+            {
+                name: `${contactGivenName} ${contactLastName}`,
+                phone: `${contactCountryCode} ${contactPhoneNumber}`
+            }
+        ]
+    };
+}
 
     function createFHIRPatient() {
         const firstName = document.querySelector('[name="given_name"]').value.trim();

@@ -110,7 +110,7 @@ function createPatientData() {
         birthdate: formattedBirthdate,
         gender: gender.toLowerCase(),
         address: `${line}, ${city}, ${state}, ${postalCode}`,
-        phone: `${countryCode}${phoneNumber}`,
+        phone: `${countryCode} ${phoneNumber}`,
         email: email,
         identifier: formattedSSN,
     };
