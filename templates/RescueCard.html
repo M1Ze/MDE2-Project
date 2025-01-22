@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Rescue Card</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .card {
+            max-width: 400px;
+            margin: 20px auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background: white;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #21535a, #0d2f32);
+            color: white;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 15px;
+        }
+        .card-body {
+            padding: 20px;
+        }
+        .dnr-banner {
+            display: none;
+            background-color: #dc3545;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 10px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #495057;
+            border-bottom: 2px solid #21535a;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #495057;
+        }
+        .info-value {
+            color: #343a40;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="card-header">
+            Emergency Rescue Card
+            <img src="/static/images/favicon144.png" alt="Digital Emergency Patient Summary"
+                     style="height: 40px; border-radius: 10px;">
+        </div>
+        <div class="card-body">
+            <!-- DNR Banner -->
+            <div id="dnr-banner" class="dnr-banner">DO NOT RESUSCITATE</div>
+
+            <!-- Personal Information -->
+            <div class="section">
+                <div class="section-title">Personal Information</div>
+                <div class="info-row">
+                    <span class="info-label">Name:</span>
+                    <span class="info-value" id="full_name"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value" id="email"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Social Security Number:</span>
+                    <span class="info-value" id="social_security_number"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Birthdate:</span>
+                    <span class="info-value" id="birthdate"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Gender:</span>
+                    <span class="info-value" id="gender"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Address:</span>
+                    <span class="info-value" id="address"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">City, State, ZIP:</span>
+                    <span class="info-value" id="city_state_zip"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Telephone:</span>
+                    <span class="info-value" id="telephone"></span>
+                </div>
+            </div>
+
+            <!-- Physical Information -->
+            <div class="section">
+                <div class="section-title">Physical Information</div>
+                <div class="info-row">
+                    <span class="info-label">Height:</span>
+                    <span class="info-value" id="height"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Weight:</span>
+                    <span class="info-value" id="weight"></span>
+                </div>
+            </div>
+
+            <!-- Medical Information -->
+            <div class="section">
+                <div class="section-title">Medical Information</div>
+                <div class="info-row" id="resuscitation-order-row" style="display: none;">
+                    <span class="info-label">Resuscitation Order:</span>
+                    <span class="info-value" id="resuscitation_order"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Blood Type:</span>
+                    <span class="info-value" id="blood_type"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Conditions:</span>
+                    <span class="info-value" id="conditions"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Allergies:</span>
+                    <span class="info-value" id="allergies"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Medications:</span>
+                    <span class="info-value" id="medications"></span>
+                </div>
+            </div>
+
+            <!-- Emergency Contact -->
+            <div class="section">
+                <div class="section-title">Emergency Contact</div>
+                <div class="info-row">
+                    <span class="info-label">Name:</span>
+                    <span class="info-value" id="emergency_contact_name"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Telephone:</span>
+                    <span class="info-value" id="emergency_contact_telephone"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Replace with actual data retrieval logic
+        const resuscitationOrder = 'DNR'; // Replace dynamically
+        if (resuscitationOrder === 'DNR') {
+            document.getElementById('dnr-banner').style.display = 'block';
+
+        }
+        document.getElementById('full_name').textContent = 'Max Mustermann';
+        document.getElementById('email').textContent = 'user@example.com';
+        document.getElementById('social_security_number').textContent = '1234';
+        document.getElementById('birthdate').textContent = '1990-01-01';
+        document.getElementById('gender').textContent = 'Male';
+        document.getElementById('address').textContent = 'Main St 123';
+        document.getElementById('city_state_zip').textContent = 'Vienna, Wien, 1010';
+        document.getElementById('telephone').textContent = '+43 123456789';
+        document.getElementById('height').textContent = '180 cm';
+        document.getElementById('weight').textContent = '75 kg';
+        document.getElementById('blood_type').textContent = 'A+';
+        document.getElementById('conditions').textContent = 'Diabetes, Pacemaker';
+        document.getElementById('allergies').textContent = 'Lactose, Peanut';
+        document.getElementById('medications').textContent = 'Insulin, Aspirin';
+        document.getElementById('emergency_contact_name').textContent = 'Jane Doe';
+        document.getElementById('emergency_contact_telephone').textContent = '+43 987654321';
+    </script>
+</body>
+</html>
