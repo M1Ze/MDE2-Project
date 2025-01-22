@@ -3,8 +3,74 @@
 {% block title %}Index Page{% endblock %}
 
 {% block content %}
-<div class="row">
-    <h1>Welcome to the Digital Emergency Patient Summary</h1>
-    <p>General content.</p>
+<div class="d-flex flex-column min-vh-100">
+    <!-- Main Content Section -->
+    <div class="container flex-grow-1">
+        <div class="row mt-4">
+            <h1 class="text-center">Welcome to the Digital Emergency Patient Summary</h1>
+            <p class="text-center">In medical emergencies, every second counts! DEPS ensures prompt and secure access to vital patient information.</p>
+        </div>
+
+        <!-- General Content Section with Cards -->
+        <div class="row mt-5">
+            <!-- Card 1 -->
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Speed</h5>
+                        <p class="card-text">Careful access to essential patient data ensures faster and more efficient emergency care for all EU citizens.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Security</h5>
+                        <p class="card-text">With state-of-the-art technology, DEPS ensures secure data processing so you never have to worry about your sensitive information.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Collaboration</h5>
+                        <p class="card-text">DEPS seamlessly integrates with ELGA, empowering medical professionals, first responders, and patients equally.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="container-fluid py-4 bg-light border-top">
+        <div class="row">
+            <div class="col-md-4">
+                <h5>Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="https://moodle.technikum-wien.at/mod/wiki/view.php?wid=3050&title=MDE2+Project+WIKI&group=72440" class="text-decoration-none" target="_blank" rel="noopener noreferrer">Our Wiki</a></li>
+                    <li><a href="https://www.hl7.org/fhir/" class="text-decoration-none" target="_blank" rel="noopener noreferrer">HL7 Fhir</a></li>
+                    <li><a href="https://health.ec.europa.eu/ehealth-digital-health-and-care/electronic-cross-border-health-services_en" class="text-decoration-none" target="_blank" rel="noopener noreferrer">MyHealth@EU</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h5>Resources</h5>
+                <ul class="list-unstyled">
+                    <li><a href="https://getbootstrap.com/" class="text-decoration-none" target="_blank" rel="noopener noreferrer">Bootstrap</a></li>
+                    <li><a href="https://flask.palletsprojects.com/en/stable/" class="text-decoration-none" target="_blank" rel="noopener noreferrer">Python Flask</a></li>
+                    <li><a href="https://pypi.org/project/fhir.resources/" class="text-decoration-none" target="_blank" rel="noopener noreferrer">fhir.resources library</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h5>About Us</h5>
+                <p>
+                    MRSJ is the name of a student project group of the course MDE2 at the FH Technikum Wien. It consists of Michael Zechmeister, Ronald Riegler, Sebastian Schedl and Jakob Eder.
+                </p>
+            </div>
+        </div>
+    </footer>
 </div>
 {% endblock %}
