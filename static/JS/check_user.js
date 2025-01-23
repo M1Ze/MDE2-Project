@@ -285,7 +285,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             console.warn("No matching blood type radio button for:", record.data.valueString);
                         }
                     }
-
                     // Check for rhesus factor
                     else if (record.type === 'Rhesus Factor' && record.data?.valueString) {
                         console.log("Rhesus Factor value from backend:", record.data.valueString);
@@ -306,33 +305,74 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
 
-                    // Check for pregnancy status
-                    if (record.type === 'Pregnancy Status' && record.data?.valueQuantity?.value) {
-                        const pregnancyStatus = record.data.valueQuantity.value.toLowerCase(); // Use valueQuantity.value
-                        console.log("Pregnancy Status:", pregnancyStatus);
 
-                        const pregnantYes = document.querySelector('#pregnant_yes');
-                        const pregnantNo = document.querySelector('#pregnant_no');
-                        const pregnancyWeeksDropdown = document.querySelector('#pregnancy-weeks');
-                        const pregnancyWeeks = document.querySelector('#pregnancyWeeks');
+                     // Check for pregnancy status
+        if (record.type === 'Pregnancy' && record.data?.valueString) {
+            console.log("Pregnancy status found:", record.data.valueString);
 
-                        if (pregnancyStatus === 'pregnant' && pregnantYes) {
-                            pregnantYes.checked = true;
+            const pregnancyStartDate = document.querySelector('#pregnancyStartDate'); // Input field for start date
+            const pregnantYes = document.querySelector('#pregnant_yes'); // Yes radio button
+            const pregnantNo = document.querySelector('#pregnant_no'); // No radio button
+            const pregnancyDatePicker = document.querySelector('#pregnancy-date'); // Date picker section
 
-                            // Display pregnancy weeks dropdown
-                            if (pregnancyWeeksDropdown) pregnancyWeeksDropdown.style.display = 'block';
+            if (record.data.valueString.toLowerCase() === 'pregnant') {
+                // Mark "Yes" radio button as checked
+                if (pregnantYes) pregnantYes.checked = true;
 
-                            // Set pregnancy weeks if available
-                            if (pregnancyWeeks && record.data.pregnancyWeeks) {
-                                pregnancyWeeks.value = record.data.pregnancyWeeks;
-                            }
-                        } else if (pregnancyStatus !== 'pregnant' && pregnantNo) {
-                            pregnantNo.checked = true;
+                // Show the pregnancy date picker
+                if (pregnancyDatePicker) pregnancyDatePicker.style.display = 'block';
 
-                            // Hide pregnancy weeks dropdown
-                            if (pregnancyWeeksDropdown) pregnancyWeeksDropdown.style.display = 'none';
-                        }
-                    }
+                // Populate the pregnancy start date if available
+                if (pregnancyStartDate && record.data.effectiveDateTime) {
+                    pregnancyStartDate.value = record.data.effectiveDateTime.split('T')[0]; // Format to YYYY-MM-DD
+                }
+            } else {
+                // Handle cases where valueString implies not pregnant (e.g., "Not Pregnant")
+                if (pregnantNo) pregnantNo.checked = true;
+
+                // Hide the pregnancy date picker
+                if (pregnancyDatePicker) pregnancyDatePicker.style.display = 'none';
+
+                // Clear the pregnancy start date (if any)
+                if (pregnancyStartDate) pregnancyStartDate.value = '';
+            }
+        } else if (record.type !== 'Pregnancy Status') {
+            // If no pregnancy observation is found or the type doesn't match, default to "No"
+            const pregnantNo = document.querySelector('#pregnant_no');
+            const pregnancyDatePicker = document.querySelector('#pregnancy-date');
+            const pregnancyStartDate = document.querySelector('#pregnancyStartDate');
+
+            if (pregnantNo) pregnantNo.checked = true; // Mark "No" by default
+            if (pregnancyDatePicker) pregnancyDatePicker.style.display = 'none'; // Hide date picker
+            if (pregnancyStartDate) pregnancyStartDate.value = ''; // Clear the value
+        }
+                    // // Check for pregnancy status
+                    // if (record.type === 'Pregnancy Status' && record.data?.valueString) {
+                    //     const pregnancyStatus = record.data.valueString.toLowerCase(); // Use valueQuantity.value
+                    //     console.log("Pregnancy Status:", pregnancyStatus);
+                    //
+                    //     const pregnantYes = document.querySelector('#pregnant_yes');
+                    //     const pregnantNo = document.querySelector('#pregnant_no');
+                    //     const pregnancyWeeksDropdown = document.querySelector('#pregnancy-weeks');
+                    //     const pregnancyWeeks = document.querySelector('#pregnancyWeeks');
+                    //
+                    //     if (pregnancyStatus === 'pregnant' && pregnantYes) {
+                    //         pregnantYes.checked = true;
+                    //
+                    //         // Display pregnancy weeks dropdown
+                    //         if (pregnancyWeeksDropdown) pregnancyWeeksDropdown.style.display = 'block';
+                    //
+                    //         // Set pregnancy weeks if available
+                    //         if (pregnancyWeeks && record.data.pregnancyWeeks) {
+                    //             pregnancyWeeks.value = record.data.pregnancyWeeks;
+                    //         }
+                    //     } else if (pregnancyStatus !== 'pregnant' && pregnantNo) {
+                    //         pregnantNo.checked = true;
+                    //
+                    //         // Hide pregnancy weeks dropdown
+                    //         if (pregnancyWeeksDropdown) pregnancyWeeksDropdown.style.display = 'none';
+                    //     }
+                    // }
 
 
                 }
@@ -619,3 +659,4 @@ document.addEventListener('DOMContentLoaded', () => {
 //         document.querySelector('#inputState').value = patient.state;
 //     }
 // }
+
