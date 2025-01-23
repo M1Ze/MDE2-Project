@@ -112,3 +112,9 @@ class ConsentData:
         # Serialize the resource to JSON
         with open(full_path, "w") as file:
             file.write(consent_resource.json(indent=4))
+
+    def populate_from_dict(self,data,patient):
+
+        self.patient_id = patient.id
+        self.identifier = patient.identifier
+        self.status = data.get("status")
