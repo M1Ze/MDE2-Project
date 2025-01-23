@@ -443,3 +443,55 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    const addMedicationButton = document.getElementById('add-medication');
+    const medicationList = document.getElementById('medication-list');
+    const medicationSelect = document.getElementById('medication_name');
+    const manufacturerSelect = document.getElementById('medication_manufacturer');
+
+    addMedicationButton.addEventListener('click', () => {
+        const selectedMedication = medicationSelect.value;
+        const selectedManufacturer = manufacturerSelect.value;
+
+        if (!selectedMedication || !selectedManufacturer) {
+            alert('Please select both a medication and a manufacturer.');
+            return;
+        }
+
+        // Check if the medication-manufacturer pair is already in the list
+        const existingRows = Array.from(medicationList.querySelectorAll('tr'));
+        const isAlreadyAdded = existingRows.some(row => {
+            const cells = row.querySelectorAll('td');
+            return cells[0]?.textContent === selectedManufacturer && cells[1]?.textContent === selectedMedication;
+        });
+
+        if (isAlreadyAdded) {
+            alert('This medication and manufacturer pair is already in the list.');
+            return;
+        }
+
+        // Create a new row for the table
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td>${selectedManufacturer}</td>
+            <td>${selectedMedication}</td>
+            <td><button type="button" class="btn btn-danger btn-sm remove-medication">Remove</button></td>
+        `;
+
+        // Append the new row to the medication list
+        medicationList.appendChild(newRow);
+
+        // Reset dropdowns to default state
+        medicationSelect.selectedIndex = 0;
+        manufacturerSelect.selectedIndex = 0;
+    });
+
+    // Event delegation to handle removing a row
+    medicationList.addEventListener('click', (event) => {
+        if (event.target.classList.contains('remove-medication')) {
+            const row = event.target.closest('tr');
+            row.remove();
+        }
+    });
+});
