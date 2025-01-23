@@ -121,7 +121,6 @@ class ObservationData:
 
     def create_fhir_inFilesystem(self, filepath, patient_folder):
 
-
         # Ensure the patient folder exists
         os.makedirs(patient_folder, exist_ok=True)
 
