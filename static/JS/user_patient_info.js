@@ -21,9 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Lock and unlock conditions and allergies
     setupLockButtons('lock-conditions', '.condition-checkbox');
     setupLockButtons('lock-allergies', '.allergy-checkbox');
-    setupLockButtons('lock-blood-type', ['.blood-radio', '.rhesus-radio']);
-
-    // DNR button and checkbox handling
+    setupLockButtons('lock-blood-type', ['.blood-radio', '.rhesus-radio']);   // DNR button and checkbox handling
     setupDnrHandlers();
 
 
@@ -124,14 +122,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setupLockButtons(buttonId, selectors) {
         const lockButton = document.getElementById(buttonId);
+
+        // Ensure all elements from the selectors are flattened into a single array
         const elements = Array.isArray(selectors)
-            ? selectors.flatMap((selector) => document.querySelectorAll(selector))
-            : document.querySelectorAll(selectors);
+            ? selectors.map((selector) => Array.from(document.querySelectorAll(selector))).flat()
+            : Array.from(document.querySelectorAll(selectors));
 
         lockButton.addEventListener('click', () => {
-            const isLocked = lockButton.textContent === 'Unlock';
-            elements.forEach((element) => (element.disabled = !isLocked));
-            lockButton.textContent = isLocked ? 'Lock' : 'Unlock';
+            const isLocked = lockButton.textContent === 'Unlock'; // Check the current button state
+            elements.forEach((element) => (element.disabled = !isLocked)); // Toggle the `disabled` property
+            lockButton.textContent = isLocked ? 'Lock' : 'Unlock'; // Update button text
         });
     }
 

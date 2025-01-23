@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.status === 'success') {
                     populateFormFields(data.patient); // Fill form fields with FHIR Patient resource data
                     populateHealthFields(data.health_data); // Populate health-related fields
-                    alert(dnrCheckConfirmed);
+          //          alert(dnrCheckConfirmed);
                     setupDnrHandlers(dnrCheckConfirmed);
                 } else {
                     console.error('Error fetching patient data:', data.message);
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
         healthData.forEach(record => {
                 console.log(`Processing record for type: ${record.type}`);
                 console.log("Record data:", record.data);
-                alert(record.type)
+                //alert(record.type)
 
 
                 // let dnrConfirmed = false; // Standardwert für DNR
