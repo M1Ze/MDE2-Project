@@ -75,12 +75,18 @@ class ObservationData:
         data_unit = self._parse_unit()
 
         value_quantity = None  # Initialize as None
+        value_string = None
         if data_value is not None and data_unit is not None:
             # Create a Quantity object for valueQuantity
             value_quantity = Quantity(
                 value=data_value,
                 unit=data_unit
             )
+        elif self.data is not None:
+            value_string = self.data
+
+
+
 
         # Validate or transform effectiveDateTime into a valid ISO-8601 datetime
         if self.data_aqu_datetime:
@@ -101,7 +107,8 @@ class ObservationData:
             status="final",
             code=codeable_concept,
             effectiveDateTime=self.data_aqu_datetime,
-            valueQuantity=value_quantity  # Include only if valueQuantity is not None
+            valueQuantity=value_quantity,
+            valueString= value_string  # Include only if valueQuantity is not None
         )
 
         # Return the JSON-encoded FHIR Observation resource
