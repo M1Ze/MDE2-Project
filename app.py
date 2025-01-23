@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 import requests
 
-from csv_handler import csv_to_dict
+from csv_handler import csv_to_dict, get_medication_dict
 from db_models import db, Patient, HealthData, User
 from fhir_data_processing.condition_data import ConditionData
 from fhir_data_processing.patient_data import PatientData
@@ -275,6 +275,10 @@ def save_patient_data():
 
     user_id = token_check['user_id']
 
+    # Clear the health_data table
+    db.session.query(HealthData).delete()
+    db.session.commit()
+
     try:
         data = request.get_json()
         if not data:
@@ -399,18 +403,17 @@ def save_medications(medications, patient):
     if not isinstance(medications, list):
         return  # No medications to process
 
-    print(medications)
-
     try:
         for med in medications:
             medication = MedicationData()
 
             file_path = 'Allgemein/snomed_ct_codes_medication.csv'
-            medication_dict = csv_to_dict(file_path)
+            medication_dict = get_medication_dict(file_path)
 
             key_to_find = med.get('medication')
             if key_to_find in medication_dict:
                 medication.code = medication_dict[key_to_find]
+
 
             medication.manufacturer = med.get('manufacturer')
 
@@ -424,6 +427,7 @@ def save_medications(medications, patient):
                 data_aqu_datetime = datetime.fromisoformat(data_aqu_datetime.replace("Z", "+00:00"))
 
             medication_fhir_resource = json.loads(json.dumps(medication.create_fhir()))
+            print(medication_fhir_resource)
 
             if existing_med:
                 existing_med.data = medication_fhir_resource
