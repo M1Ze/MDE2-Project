@@ -152,6 +152,10 @@
                     <span class="info-label">Medications:</span>
                     <span class="info-value" id="medications"></span>
                 </div>
+                <div class="info-row" id="pregnantSection" style="display: none;">
+                    <span class="info-label">Pregnant:</span>
+                    <span class="info-value" id="pregnant"></span>
+                </div>
             </div>
 
             <!-- Emergency Contact -->
@@ -176,6 +180,13 @@
             document.getElementById('dnr-banner').style.display = 'block';
 
         }
+        const pregnantValue = 'Yes'
+        if (pregnantValue === 'Yes') {
+            const pregnantSection = document.getElementById('pregnantSection');
+            document.getElementById('pregnant').textContent = '12 weeks'
+            pregnantSection.style.display = ''; // Show the section
+        }
+
         document.getElementById('full_name').textContent = 'Max Mustermann';
         document.getElementById('email').textContent = 'user@example.com';
         document.getElementById('social_security_number').textContent = '1234';
