@@ -367,9 +367,10 @@ def save_observations(observations, patient):
             app.logger.error(f"Error processing observation: {obs_data}, Error: {str(e)}")
 
 def save_consent(consent_data, patient):
-    if not isinstance(consent_data, dict):
-        return  # No consent data to process
+    if not isinstance(consent_data, dict) or not consent_data:
+        return  # No consent data to process (either not a dict or it's empty)
 
+    print(consent_data)
     try:
         consent = ConsentData()
         consent.populate_from_dict(consent_data,patient)
