@@ -44,6 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const observations = createObservations();
         const consent = createConsentData();
         const conditions = createConditionData()
+        const allergies = createAllergyData();
+        const medications = createMedicationData()
 
         // Build request payload
         const payload = {patient};
@@ -55,6 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (conditions.length > 0) {
             payload.conditions = conditions;
+        }
+        if (allergies.length > 0) {
+            payload.allergies = allergies;
+        }
+        if (medications.length > 0) {
+            payload.medications = medications;
         }
 
         const token = localStorage.getItem('token');
@@ -345,16 +353,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const conditionCheckboxes = document.querySelectorAll('.condition-checkbox'); // Alle Condition-Checkboxen
         const conditions = [];
 
-        // Iteriere über die Checkboxen und überprüfe, welche ausgewählt sind
+        // iterate over the checkboxes and find the checked ones
         conditionCheckboxes.forEach(checkbox => {
             if (checkbox.checked) {
                 conditions.push({
                     condition: checkbox.value
-                }); // Füge den Wert der ausgewählten Checkbox hinzu
+                }); // add the value of the checked box
             }
         });
-        // Rückgabe als JSON
+        // retrieve json
         return conditions;
+    }
+
+    function createAllergyData() {
+    const allergyCheckboxes = document.querySelectorAll('.allergy-checkbox'); // Alle Allergy-Checkboxen
+    const allergies = [];
+
+    // same as conditions
+    allergyCheckboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+            allergies.push({
+                allergy: checkbox.value
+            });
+        }
+    });
+    // retrieve json
+    return allergies;
+}
+    function createMedicationData(){
+        return [];
     }
 });
 
