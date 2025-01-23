@@ -324,10 +324,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function populateMedicationTable(medicationDict) {
-    const tableBody = document.getElementById('medication-list');
+    const medicationList = document.getElementById('medication-list');
 
     // Clear the table body first (optional, if needed)
-    tableBody.innerHTML = '';
+    medicationList.innerHTML = '';
 
     // Loop through the medication dictionary and create table rows
     for (const [medicationName, manufacturer] of Object.entries(medicationDict)) {
@@ -344,8 +344,27 @@ document.addEventListener('DOMContentLoaded', () => {
         medicationCell.textContent = medicationName;
         row.appendChild(medicationCell);
 
+        const buttonCell = document.createElement('td');
+        // Create the button element
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'btn btn-danger btn-sm remove-medication';
+        removeButton.textContent = 'Remove';
+
+        // Append the button to the buttonCell
+        buttonCell.appendChild(removeButton);
+        row.appendChild(buttonCell);
+
         // Append the row to the table body
-        tableBody.appendChild(row);
+        medicationList.appendChild(row);
+
+        // Event delegation to handle removing a row
+        medicationList.addEventListener('click', (event) => {
+            if (event.target.classList.contains('remove-medication')) {
+                const row = event.target.closest('tr');
+                row.remove();
+            }
+        });
     }
 }
 
