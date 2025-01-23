@@ -326,30 +326,14 @@
             <h2 class="text-center mb-4">Conditions</h2>
             <div class="p-3 border rounded">
                 <div id="condition-list">
+                    {% for condition, condition_id in zip(conditions, condition_ids) %}
                     <div class="form-check">
                         <input class="form-check-input condition-checkbox" type="checkbox" name="conditions"
-                               id="condition-hbp"
-                               value="High Blood Pressure">
-                        <label class="form-check-label" for="condition-hbp">High Blood Pressure</label>
+                               id='condition-{{ condition_id }}'
+                               value="{{ condition }}">
+                        <label class="form-check-label" for="condition-{{ condition_id }}">{{ condition }}</label>
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input condition-checkbox" type="checkbox" name="conditions"
-                               id="condition-diabetes"
-                               value="Diabetes">
-                        <label class="form-check-label" for="condition-diabetes">Diabetes</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input condition-checkbox" type="checkbox" name="conditions"
-                               id="condition-hearing-aid"
-                               value="Hearing Aid">
-                        <label class="form-check-label" for="condition-hearing-aid">Hearing Aid</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input condition-checkbox" type="checkbox" name="conditions"
-                               id="condition-pacemaker"
-                               value="Pacemaker">
-                        <label class="form-check-label" for="condition-pacemaker">Pacemaker</label>
-                    </div>
+                    {% endfor %}
                 </div>
                 <button type="button" class="btn btn-secondary mt-3" id="lock-conditions">Lock</button>
             </div>

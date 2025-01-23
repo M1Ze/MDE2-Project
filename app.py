@@ -81,7 +81,30 @@ def userPatientInfo():
     # Remove duplicates
     medications = list(set(medications))
     manufacturers = list(set(manufacturers))
-    return render_template('user_patient_info.html', medications=medications, manufacturers=manufacturers)
+
+
+    conditions = []
+    condition_codes = []
+    condition_ids = []
+    # Read the CSV file
+    with open('Allgemein/snomed_ct_codes_condition.csv', newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')  # Specify the correct delimiter
+        next(reader)  # Skip the header row
+        for row in reader:
+            conditionCode = row[0]
+            condition = row[1]
+            condition_codes.append(conditionCode)
+            conditions.append(condition)
+
+            # Create an ID-friendly version of the condition
+            processed_condition = condition.replace(' ', '-').lower()
+            condition_ids.append(processed_condition)
+
+    # Remove duplicates
+    conditions = list(set(conditions))
+    condition_codes = list(set(condition_codes))
+    condition_ids = list(set(condition_ids))
+    return render_template('user_patient_info.html', medications=medications, manufacturers=manufacturers, conditions=conditions, condition_codes=condition_codes, condition_ids=condition_ids, zip=zip)
 
 
 from datetime import datetime
