@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(patient);
         const observations = createObservations();
         const consent = createConsentData();
+        const conditions = createConditionData()
 
         // Build request payload
         const payload = {patient};
@@ -51,6 +52,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (consent.consent) {
             payload.consent = consent;
+        }
+        if (conditions.length > 0) {
+            payload.conditions = conditions;
         }
 
         const token = localStorage.getItem('token');
@@ -171,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateButtonStates();
 
             // Set the flag to false since the user confirmed DNR
-             dnrConfirmed = false;
+            dnrConfirmed = false;
         });
 
         function updateButtonStates() {
@@ -324,18 +328,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createConsentData() {
-    const dnrCheckbox = document.querySelector('#dnr-checkbox'); // Checkbox elementconst abortButton = document.getElementById('abort-dnr-button');
-    if (dnrCheckbox && dnrCheckbox.checked && dnrConfirmed) {
-        // Return DNR consent object if checkbox is checked
-        return {
-            consent: {
-                status: "active"
-            }
-        };
+        const dnrCheckbox = document.querySelector('#dnr-checkbox'); // Checkbox elementconst abortButton = document.getElementById('abort-dnr-button');
+        if (dnrCheckbox && dnrCheckbox.checked && dnrConfirmed) {
+            // Return DNR consent object if checkbox is checked
+            return {
+                consent: {
+                    status: "active"
+                }
+            };
+        }
+        // Return empty object if checkbox is not checked
+        return {};
     }
-    // Return empty object if checkbox is not checked
-    return {};
-}
+
+    function createConditionData() {
+        const conditionCheckboxes = document.querySelectorAll('.condition-checkbox'); // Alle Condition-Checkboxen
+        const conditions = [];
+
+        // Iteriere über die Checkboxen und überprüfe, welche ausgewählt sind
+        conditionCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                conditions.push({
+                    condition: checkbox.value
+                }); // Füge den Wert der ausgewählten Checkbox hinzu
+            }
+        });
+        // Rückgabe als JSON
+        return conditions;
+    }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
