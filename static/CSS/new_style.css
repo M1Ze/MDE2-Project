@@ -79,19 +79,19 @@
     color: white; /* Keep text white on hover */
 }
 
-/* Ensure the page covers the full viewport height */
+/*!* Ensure the page covers the full viewport height *!
 html, body {
-    height: 100%; /* Full height */
+    height: 100%; !* Full height *!
     margin: 0;
     padding: 0;
-}
-
-/* Main flexbox layout for the page */
+}*/
+/*
+!* Main flexbox layout for the page *!
 .d-flex {
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* Ensure the page spans the viewport */
-}
+    min-height: 100vh; !* Ensure the page spans the viewport *!
+}*/
 
 /* Flex-grow ensures content fills space above footer */
 .flex-grow-1 {
