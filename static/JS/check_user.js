@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function populateHealthFields(healthData) {
         console.log("Health data received from backend:", healthData);
-
+        const medicationDictionary = {};
         healthData.forEach(record => {
                 console.log(`Processing record for type: ${record.type}`);
                 console.log("Record data:", record.data);
@@ -296,12 +296,58 @@ document.addEventListener('DOMContentLoaded', () => {
                     Penicillin.checked = true;
                 }
 
-            }
-        )
-        ;
+                else if (record.data?.resourceType === 'Medication') {
+                    // Extract the type from the top-level and contained names
+                    const medicationType = record.type || 'No Type'; // Safe fallback if `type` is missing
+                    const contained = record.data.contained || []; // Default to an empty array if contained is undefined
+                    const medicationNames = contained.map(item => item.name || 'Unnamed'); // Extract contained names
+
+                            // Add or append to the dictionary
+                    if (!medicationDictionary[medicationType]) {
+                        // If the type doesn't exist in the dictionary, initialize it
+                        medicationDictionary[medicationType] = [];
+                    }
+                    // Merge existing names with new names for the medication type
+                    medicationDictionary[medicationType] = medicationDictionary[medicationType].concat(medicationNames);
+
+                    console.log('MedicationDictionary', medicationDictionary)
+
+
+
+                }
+        });
+
+        populateMedicationTable(medicationDictionary)
+
         // Call setupPregnancySectionVisibility after fields are populated
         setupPregnancySectionVisibility();
     }
+
+    function populateMedicationTable(medicationDict) {
+    const tableBody = document.getElementById('medication-list');
+
+    // Clear the table body first (optional, if needed)
+    tableBody.innerHTML = '';
+
+    // Loop through the medication dictionary and create table rows
+    for (const [medicationName, manufacturer] of Object.entries(medicationDict)) {
+        // Create a new row
+        const row = document.createElement('tr');
+
+        // Create a cell for the manufacturer
+        const manufacturerCell = document.createElement('td');
+        manufacturerCell.textContent = manufacturer;
+        row.appendChild(manufacturerCell);
+
+        // Create a cell for the medication name
+        const medicationCell = document.createElement('td');
+        medicationCell.textContent = medicationName;
+        row.appendChild(medicationCell);
+
+        // Append the row to the table body
+        tableBody.appendChild(row);
+    }
+}
 
     function setupPregnancySectionVisibility() {
         const genderField = document.getElementById('inputGender');
