@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const patient = createPatientData();
         console.log(patient);
-        const observations = gatherObservations();
+        const observations = createObservations();
 
         // Build request payload
         const payload = {patient};
@@ -237,70 +237,82 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    function createFHIRPatient() {
-        const firstName = document.querySelector('[name="given_name"]').value.trim();
-        const lastName = document.querySelector('[name="last_name"]').value.trim();
-        const email = document.querySelector('[name="email"]').value.trim();
-        const gender = document.querySelector('#inputGender').value.toLowerCase();
-        const birthDate = document.querySelector('#inputBirthday').value;
-        const countryCode = document.querySelector('#inputCountryCode').value;
-        const phoneNumber = document.querySelector('#inputPhonenumber').value.trim();
-        const address = document.querySelector('#inputAddress').value.trim();
-        const city = document.querySelector('#inputCity').value.trim();
-        const zip = document.querySelector('#inputZip').value.trim();
-        const state = document.querySelector('#inputState').value;
-        const ssn = document.querySelector('[name="socialsecuritynumber"]').value.trim();
+    function createObservations() {
+    const observations = [];
 
-        // Format SSN with birthdate
-        const birthdateParts = birthDate.split('-');
-        const formattedBirthdate = `${birthdateParts[2]}${birthdateParts[1]}${birthdateParts[0]}`;
-        const formattedSSN = `${ssn}${formattedBirthdate}`;
-
-        return {
-            resourceType: "Patient",
-            identifier: [
-                {
-                    use: "official",
-                    system: "urn:oid:2.16.840.1.113883.4.1", // Example OID for SSN
-                    value: formattedSSN
-                }
-            ],
-            name: [
-                {
-                    use: "official",
-                    family: lastName,
-                    given: [firstName]
-                }
-            ],
-            gender: gender,
-            birthDate: birthDate,
-            telecom: [
-                {
-                    system: "email",
-                    value: email,
-                    use: "home"
-                },
-                {
-                    system: "phone",
-                    value: `${countryCode} ${phoneNumber}`,
-                    use: "mobile"
-                }
-            ],
-            address: [
-                {
-                    line: [address],
-                    city: city,
-                    postalCode: zip,
-                    state: state,
-                    country: "Austria"
-                }
-            ]
-        };
+    // Height Observation
+    const heightValue = document.querySelector('#inputHeight')?.value.trim();
+    const heightUnit = document.querySelector('input[name="height_unit"]:checked')?.value;
+    if (heightValue && heightUnit) {
+        observations.push({
+            observation: {
+                identifier: `obs-8302-2`, // LOINC code for height
+                type: "Height",
+                data: `${heightValue} ${heightUnit}`,
+                data_aqu_datetime: new Date().toISOString()
+            }
+        });
     }
 
+    // Weight Observation
+    const weightValue = document.querySelector('#inputWeight')?.value.trim();
+    const weightUnit = document.querySelector('input[name="weight_unit"]:checked')?.value;
+    if (weightValue && weightUnit) {
+        observations.push({
+            observation: {
+                identifier: `obs-29463-7`, // LOINC code for weight
+                type: "Weight",
+                data: `${weightValue} ${weightUnit}`,
+                data_aqu_datetime: new Date().toISOString()
+            }
+        });
+    }
+
+    // Blood Type Observation
+    const bloodType = document.querySelector('input[name="blood_type"]:checked')?.value;
+    if (bloodType) {
+        observations.push({
+            observation: {
+                identifier: `obs-883-9`,
+                type: "Blood Type",
+                data: bloodType,
+                data_aqu_datetime: new Date().toISOString()
+            }
+        });
+    }
+
+    // Rhesus Factor Observation
+    const rhesusFactor = document.querySelector('input[name="rhesus_factor"]:checked')?.value;
+    if (rhesusFactor) {
+        observations.push({
+            observation: {
+                identifier: `obs-7799-0`,
+                type: "Rhesus Factor",
+                data: rhesusFactor,
+                data_aqu_datetime: new Date().toISOString()
+            }
+        });
+    }
+
+    // Pregnancy Observation
+    const gender = document.querySelector('#inputGender')?.value.toLowerCase();
+    const pregnancyStatus = document.querySelector('input[name="pregnancy_status"]:checked')?.value;
+    const pregnancyStartDate = document.querySelector('input[name="pregnancy_start_date"]')?.value.trim();
+    if (['female', 'other', 'unknown'].includes(gender) && pregnancyStatus === 'yes' && pregnancyStartDate) {
+        observations.push({
+            observation: {
+                identifier: `obs-82810-3`,
+                type: "Pregnancy",
+                data: "Pregnant",
+                data_aqu_datetime: pregnancyStartDate
+            }
+        });
+    }
+
+    return observations;
+}
+
     // Gather Observations Function
-
-
     function gatherObservations() {
         const observations = [];
 
@@ -309,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const heightUnit = document.querySelector('input[name="height_unit"]:checked')?.value || null;
         console.log("Height:", heightValue, heightUnit);
         if (heightValue) {
-            observations.push(createObservation('Height', heightValue, heightUnit));
+            observations.push(createObservationData('Height', heightValue, heightUnit));
         }
 
         // Weight Observation
@@ -317,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const weightUnit = document.querySelector('input[name="weight_unit"]:checked')?.value || null;
         console.log("Weight:", weightValue, weightUnit);
         if (weightValue) {
-            observations.push(createObservation('Weight', weightValue, weightUnit));
+            observations.push(createObservationData('Weight', weightValue, weightUnit));
         }
 
         // Blood Type and Rhesus Factor Observation
@@ -326,8 +338,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Blood Type:", bloodType);
         console.log("Rhesus Factor:", rhesusFactor);
         if (bloodType && rhesusFactor) {
-            observations.push(createObservation('Blood Type', bloodType, null));
-            observations.push(createObservation('Rhesus Factor', rhesusFactor, null));
+            observations.push(createObservationData('Blood Type', bloodType, null));
+            observations.push(createObservationData('Rhesus Factor', rhesusFactor, null));
         }
 
         // Pregnancy Status Observation
@@ -339,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Pregnancy Weeks:", pregnancyWeeks);
 
         if (['female', 'unknown', 'other'].includes(gender) && pregnancyStatus === 'yes' && pregnancyWeeks) {
-            const pregnancyObservation = createObservation('Pregnancy Status', "Pregnant", null);
+            const pregnancyObservation = createObservationData('Pregnancy Status', "Pregnant", null);
             pregnancyObservation.pregnancyWeeks = pregnancyWeeks;
             observations.push(pregnancyObservation);
         }
@@ -351,11 +363,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function createObservationData() {
     // Extract height
     const heightValue = document.querySelector('input[name="height"]').value.trim();
-    const heightUnit = document.querySelector('select[name="height_unit"]').value.trim();
+    const heightUnit = document.querySelector('input[name="height_unit"]:checked')?.value || null;
 
     // Extract weight
     const weightValue = document.querySelector('input[name="weight"]').value.trim();
-    const weightUnit = document.querySelector('select[name="weight_unit"]').value.trim();
+    const weightUnit = document.querySelector('input[name="weight_unit"]:checked');
 
     // Extract blood type
     const bloodType = document.querySelector('input[name="blood_type"]:checked')?.value;
@@ -377,10 +389,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add height observation if valid
     if (heightValue && heightUnit) {
         observations.push({
+            observation: {
             identifier: `obs-8302-2`, // LOINC code for height
             type: "Height",
-            data: `${heightValue} ${heightUnit}`,
+            data: `${heightValue} cm`,
             data_aqu_datetime: new Date().toISOString() // Current timestamp
+            }
         });
     }
 
@@ -389,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
         observations.push({
             identifier: `obs-29463-7`, // LOINC code for weight
             type: "Weight",
-            data: `${weightValue} ${weightUnit}`,
+            data: `${weightValue} kg`,
             data_aqu_datetime: new Date().toISOString() // Current timestamp
         });
     }

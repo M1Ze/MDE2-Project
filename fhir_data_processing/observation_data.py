@@ -153,26 +153,15 @@ class ObservationData:
         with open(full_path, "w") as file:
             file.write(observation_resource.json(indent=4))
 
-
     def populate_from_dict(self, data):
-        # Extract identifier
-        self.identifier = data.get("identifier", [])[0].get("value") if data.get("identifier") else None
+        """
+        Populate ObservationData from a dictionary.
+        """
+        self.identifier = data.get("identifier")
+        self.type = data.get("type")
+        self.data_aqu_datetime = data.get("data_aqu_datetime")
+        # Assign data directly or leave unchanged if no value
+        self.data = data.get("data")
 
-        # Extract observation type from "code" (FHIR standard)
-        self.type = data.get("code", {}).get("text")
 
-        # Extract the observation's effective date and time
-        self.data_aqu_datetime = data.get("effectiveDateTime")
 
-        # Extract value and unit from the observation
-        value_quantity = data.get("valueQuantity")
-        if value_quantity:
-            self.data = f"{value_quantity.get('value')} {value_quantity.get('unit')}"
-        elif "valueString" in data:
-            self.data = data["valueString"]
-        elif "valueBoolean" in data:
-            self.data = str(data["valueBoolean"])
-        elif "valueInteger" in data:
-            self.data = str(data["valueInteger"])
-        else:
-            self.data = None

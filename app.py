@@ -17,6 +17,7 @@ import jwt
 import json
 from datetime import datetime
 
+
 from generate_qr import generate_qr_code_binary
 
 # Initialize the Flask app
@@ -28,8 +29,8 @@ FHIR_SERVER_URL = "http://localhost:8080/fhir"
 db.init_app(app)
 
 with app.app_context():
-        # db.drop_all()
-        db.create_all()
+    # db.drop_all()
+    db.create_all()
 
 
 def check_token(token):
@@ -64,13 +65,20 @@ def index():
 def userPatientInfo():
     return render_template('user_patient_info.html')
 
+
+from datetime import datetime
+import json
+
+
+
+
 @app.route('/savePatientData', methods=['POST'])
 def save_patient_data():
-    # Token validation remains intact
     auth_header = request.headers.get('Authorization')
     if not auth_header or not auth_header.startswith("Bearer "):
         return jsonify({'status': 'error', 'message': 'No token provided'}), 401
 
+    # Extract and validate the token
     token = auth_header.split(" ")[1]
     token_check = check_token(token)
     if not token_check or 'user_id' not in token_check:
@@ -84,15 +92,14 @@ def save_patient_data():
         if not data:
             return jsonify({'status': 'error', 'message': 'No data received'}), 400
 
-        # Extract patient data
+        # Extract and validate patient data
         patient_data_json = data.get('patient')
-        if not patient_data_json or not isinstance(patient_data_json, dict):
+        if not isinstance(patient_data_json, dict):
             return jsonify({'status': 'error', 'message': 'Invalid or missing patient data'}), 400
 
         # Populate the PatientData object
         patient_data = PatientData()
         patient_data.populate_from_dict(patient_data_json)
-        patient_fhir_resource=patient_data.create_fhir()
 
         # Fetch the patient using the identifier
         identifier_value = patient_data.identifier
@@ -108,55 +115,289 @@ def save_patient_data():
 
         # Update patient record
         patient.name = patient_data.name or patient.name
-        patient.pat_data = json.loads(patient_fhir_resource)  # Save the updated FHIR JSON
+        patient.pat_data = json.loads(patient_data.create_fhir())  # Save updated FHIR data
 
-        # Extract and validate observations
+        # Process observations
         observations = data.get('observations', [])
         if not isinstance(observations, list):
-            return jsonify({'status': 'error', 'message': 'Invalid observations format'}), 400
+            return jsonify({'status': 'error', 'message': 'Invalid observations format, expected a list'}), 400
 
-        # Process and store observations in the database
-        for obs_data in observations:
+        for obs_wrapper in observations:
+            # Extract the observation object
+            obs_data = obs_wrapper.get('observation')
+            if not isinstance(obs_data, dict):
+                app.logger.warning(f"Skipping invalid observation format: {obs_wrapper}")
+                continue  # Skip if the observation format is invalid
+
             try:
-                # Use ObservationData to handle and validate each observation
+                # Create and populate an ObservationData object
                 observation = ObservationData()
                 observation.populate_from_dict(obs_data)
 
-                # Check for required fields
-                if not observation.identifier or not observation.type or not observation.data or not observation.data_aqu_datetime:
-                    print(f"Skipping incomplete observation: {obs_data}")
-                    continue
+                # Convert data_aqu_datetime to datetime object if in string format
+                data_aqu_datetime = observation.data_aqu_datetime
+                if isinstance(data_aqu_datetime, str):
+                    data_aqu_datetime = datetime.fromisoformat(data_aqu_datetime.replace("Z", "+00:00"))
 
-                # Check if the observation already exists
+                # Generate FHIR-compliant data as JSON string
+                h_data_json = json.dumps(observation.create_fhir(), separators=(',', ':'))
+
+                # Check if this observation already exists in the database
                 existing_obs = HealthData.query.filter_by(
                     patient_id=patient.id,
                     data_type=observation.type
                 ).first()
 
+                # Create or update the observation record in the database
                 if existing_obs:
-                    # Update the existing observation
-                    existing_obs.h_data = json.dumps(obs_data)  # Store raw JSON
-                    existing_obs.data_aqu_datetime = observation.data_aqu_datetime
+                    existing_obs.h_data = h_data_json
+                    existing_obs.data_aqu_datetime = data_aqu_datetime
                 else:
-                    # Create a new observation
                     new_obs = HealthData(
                         patient_id=patient.id,
                         data_type=observation.type,
-                        data_aqu_datetime=observation.data_aqu_datetime,
-                        h_data=json.dumps(obs_data)  # Store raw JSON
+                        data_aqu_datetime=data_aqu_datetime,
+                        h_data=json.loads(h_data_json)
                     )
                     db.session.add(new_obs)
 
             except Exception as e:
-                print(f"Error processing observation: {obs_data}, Error: {str(e)}")
+                # Log the error and skip this observation
+                app.logger.error(f"Error processing observation: {obs_data}, Error: {str(e)}")
                 continue
 
-        db.session.commit()  # Save changes
-        return jsonify({'status': 'success', 'message': f'Patient data  observations saved saved successfully'}), 200
+        db.session.commit()  # Save all changes at once
+        return jsonify({'status': 'success', 'message': 'Patient data and observations saved successfully'}), 200
+
     except Exception as e:
+        # Log and handle unexpected errors
         app.logger.error(f"Error saving patient data: {str(e)}")
         db.session.rollback()
         return jsonify({'status': 'error', 'message': 'An error occurred while saving patient data.'}), 500
+
+
+# @app.route('/savePatientData1', methods=['POST'])
+# def save_patient_data1():
+#     auth_header = request.headers.get('Authorization')
+#     if not auth_header or not auth_header.startswith("Bearer "):
+#         return jsonify({'status': 'error', 'message': 'No token provided'}), 401
+#
+#     token = auth_header.split(" ")[1]
+#     token_check = check_token(token)
+#     if not token_check or 'user_id' not in token_check:
+#         return jsonify({'status': 'error', 'message': 'Invalid token'}), 401
+#
+#     user_id = token_check['user_id']
+#
+#     try:
+#         # Parse the request JSON
+#         data = request.get_json()
+#         print(f"Raw incoming data: {data}")
+#         if not data:
+#             return jsonify({'status': 'error', 'message': 'No data received'}), 400
+#
+#         # Extract patient data
+#         patient_data_json = data.get('patient')
+#         if not isinstance(patient_data_json, dict):
+#             return jsonify({'status': 'error', 'message': 'Invalid or missing patient data'}), 400
+#
+#         # Populate the PatientData object
+#         patient_data = PatientData()
+#         patient_data.populate_from_dict(patient_data_json)
+#
+#         # Fetch the patient using the identifier
+#         identifier_value = patient_data.identifier
+#         if not identifier_value:
+#             return jsonify({'status': 'error', 'message': 'Missing identifier value'}), 400
+#
+#         patient = Patient.query.filter_by(identifier=identifier_value).first()
+#         if not patient:
+#             return jsonify({'status': 'error', 'message': 'Patient not found'}), 404
+#
+#         if patient.user_id != user_id:
+#             return jsonify({'status': 'error', 'message': 'Unauthorized access to patient data'}), 403
+#
+#         # Update patient record
+#         patient.name = patient_data.name or patient.name
+#         patient.pat_data = json.loads(patient_data.create_fhir())  # Save the updated FHIR JSON
+#
+#         # Process observations
+#         observations = data.get('observations', [])
+#         if not isinstance(observations, list):
+#             return jsonify({'status': 'error', 'message': 'Invalid observations format, expected a list'}), 400
+#
+#         for obs_data in observations:
+#             # Check and unwrap if `obs_data` is a list (nested case)
+#             if isinstance(obs_data, list):
+#                 app.logger.warning(f"Unwrapping nested list in observation: {obs_data}")
+#                 obs_data = obs_data[0]  # Take the first item if it's a list
+#             if not isinstance(obs_data, dict):
+#                 app.logger.error(f"Skipping invalid observation format: {obs_data}")
+#                 continue
+#
+#             try:
+#                 # Create and populate ObservationData object
+#                 observation = ObservationData()
+#                 observation.populate_from_dict(obs_data)
+#
+#                 # Convert data_aqu_datetime to datetime object if it's a string
+#                 data_aqu_datetime = observation.data_aqu_datetime
+#                 if isinstance(data_aqu_datetime, str):
+#                     data_aqu_datetime = datetime.fromisoformat(data_aqu_datetime.replace("Z", "+00:00"))
+#
+#                 # Generate FHIR-compliant data as JSON string
+#                 h_data_json = json.dumps(observation.create_fhir(), separators=(',', ':'))
+#
+#                 # Check if observation already exists in the database
+#                 existing_obs = HealthData.query.filter_by(
+#                     patient_id=patient.id,
+#                     data_type=observation.type
+#                 ).first()
+#
+#                 # Create or update the observation
+#                 if existing_obs:
+#                     existing_obs.h_data = h_data_json
+#                     existing_obs.data_aqu_datetime = data_aqu_datetime
+#                 else:
+#                     new_obs = HealthData(
+#                         patient_id=patient.id,
+#                         data_type=observation.type,
+#                         data_aqu_datetime=data_aqu_datetime,
+#                         h_data=h_data_json
+#                     )
+#                     db.session.add(new_obs)
+#
+#             except Exception as e:
+#                 # Log error and skip the faulty observation
+#                 app.logger.error(f"Error processing observation: {obs_data}, Error: {str(e)}")
+#                 continue
+#
+#         db.session.commit()  # Save changes
+#         return jsonify({'status': 'success', 'message': 'Patient data and observations saved successfully'}), 200
+#
+#     except Exception as e:
+#         app.logger.error(f"Error saving patient data: {str(e)}")
+#         db.session.rollback()
+#         return jsonify({'status': 'error', 'message': 'An error occurred while saving patient data.'}), 500
+
+
+
+# @app.route('/savePatientData1', methods=['POST'])
+# def save_patient_data1():
+#     # Token validation remains intact
+#     auth_header = request.headers.get('Authorization')
+#     if not auth_header or not auth_header.startswith("Bearer "):
+#         return jsonify({'status': 'error', 'message': 'No token provided'}), 401
+#
+#     token = auth_header.split(" ")[1]
+#     token_check = check_token(token)
+#     if not token_check or 'user_id' not in token_check:
+#         return jsonify({'status': 'error', 'message': 'Invalid token'}), 401
+#
+#     user_id = token_check['user_id']
+#
+#     try:
+#         # Parse the request JSON
+#         data = request.get_json()
+#         if not data:
+#             return jsonify({'status': 'error', 'message': 'No data received'}), 400
+#
+#         # Extract patient data
+#         patient_data_json = data.get('patient')
+#         if not patient_data_json or not isinstance(patient_data_json, dict):
+#             return jsonify({'status': 'error', 'message': 'Invalid or missing patient data'}), 400
+#
+#         # Populate the PatientData object
+#         patient_data = PatientData()
+#         patient_data.populate_from_dict(patient_data_json)
+#         patient_fhir_resource = patient_data.create_fhir()
+#
+#         # Fetch the patient using the identifier
+#         identifier_value = patient_data.identifier
+#         if not identifier_value:
+#             return jsonify({'status': 'error', 'message': 'Missing identifier value'}), 400
+#
+#         patient = Patient.query.filter_by(identifier=identifier_value).first()
+#         if not patient:
+#             return jsonify({'status': 'error', 'message': 'Patient not found'}), 404
+#
+#         if patient.user_id != user_id:
+#             return jsonify({'status': 'error', 'message': 'Unauthorized access to patient data'}), 403
+#
+#         # Update patient record
+#         patient.name = patient_data.name or patient.name
+#         patient.pat_data = json.loads(patient_fhir_resource)  # Save the updated FHIR JSON
+#
+#         observations = data.get('observations', [])
+#         if not isinstance(observations, list):
+#             return jsonify({'status': 'error', 'message': 'Invalid observations format'}), 400
+#
+#         # Flatten and clean observations to ensure they are dictionaries
+#         cleaned_observations = []
+#         for obs in observations:
+#             if isinstance(obs, list):
+#                 print(f"Flattening observation: {obs}")
+#                 # Add all items from the nested list to the cleaned observations
+#                 cleaned_observations.extend(obs)  # Add each dictionary in the nested list
+#             elif isinstance(obs, dict):
+#                 cleaned_observations.append(obs)  # Add any valid dictionaries
+#             else:
+#                 print(f"Skipping unsupported observation format: {obs}")  # Skip invalid types
+#
+#         # Process and store cleaned observations in the database
+#         for obs_data in cleaned_observations:
+#             try:
+#                 # Create and populate the ObservationData object
+#                 print(obs_data)
+#                 observation = ObservationData()
+#                 observation.populate_from_dict(obs_data)
+#                 print(observation.type)
+#
+#                 # Check for required fields
+#                 if not observation.identifier or not observation.type or not observation.data or not observation.data_aqu_datetime:
+#                     print(f"Skipping incomplete observation: {obs_data}")
+#                     continue
+#
+#                 # Convert data_aqu_datetime to Python datetime object
+#                 data_aqu_datetime = observation.data_aqu_datetime
+#                 if isinstance(data_aqu_datetime, str):
+#                     # Convert from ISO format to Python datetime
+#                     data_aqu_datetime = datetime.fromisoformat(data_aqu_datetime.replace("Z", "+00:00"))
+#
+#                 # Generate the FHIR-compliant data as JSON string
+#                 h_data_json = json.dumps(observation.create_fhir())  # Serialize to JSON
+#
+#                 # Check if the observation already exists in the database
+#                 existing_obs = HealthData.query.filter_by(
+#                     patient_id=patient.id,
+#                     data_type=observation.type
+#                 ).first()
+#
+#                 # Create or update the observation in the database
+#                 if existing_obs:
+#                     # Update the existing observation
+#                     existing_obs.h_data = h_data_json  # Save JSON string
+#                     existing_obs.data_aqu_datetime = data_aqu_datetime  # Use Python datetime object
+#                 else:
+#                     # Create a new observation
+#                     new_obs = HealthData(
+#                         patient_id=patient.id,
+#                         data_type=observation.type,
+#                         data_aqu_datetime=data_aqu_datetime,  # Use Python datetime object
+#                         h_data=json.loads(h_data_json)  # Save JSON string
+#                     )
+#                     db.session.add(new_obs)
+#
+#             except Exception as e:
+#                 print(f"Error processing observation: {obs_data}, Error: {str(e)}")
+#                 continue
+#
+#         db.session.commit()  # Save changes
+#         return jsonify({'status': 'success', 'message': f'Patient data  observations saved saved successfully'}), 200
+#     except Exception as e:
+#         app.logger.error(f"Error saving patient data: {str(e)}")
+#         db.session.rollback()
+#         return jsonify({'status': 'error', 'message': 'An error occurred while saving patient data.'}), 500
 
 
 @app.route('/savePatientData1', methods=['POST'])
@@ -288,12 +529,12 @@ def register():
         )
         print(patient_register_data_json)
         # Use PatientData to parse and validate the FHIR Patient resource
-        #muss nochmal überarbeiten
+        # muss nochmal überarbeiten
         patient_data = PatientData()
         patient_data.populate_from_dict(patient_register_data)
         print(patient_data)
 
-        patient_fhir_resource=patient_data.create_fhir()
+        patient_fhir_resource = patient_data.create_fhir()
 
         print(patient_fhir_resource)
 
@@ -332,6 +573,7 @@ def register():
             app.logger.error(f"Error registering user: {str(e)}")
             db.session.rollback()
             return jsonify({'status': 'error', 'message': 'An error occurred while registering the user.'}), 500
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -378,7 +620,6 @@ def checklogin():
     return jsonify({'status': 'success', 'user_id': token_check['user_id']}), 200
 
 
-
 @app.route('/getPatientInformation', methods=['GET'])
 def get_patient_information():
     auth_header = request.headers.get('Authorization')
@@ -422,9 +663,6 @@ def get_patient_information():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=False)
-
-
-
 
 # @app.route('/getPatientInformation1', methods=['GET'])
 # def get_patient_information1():
