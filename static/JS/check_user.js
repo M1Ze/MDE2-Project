@@ -1,4 +1,5 @@
 // check_user.js
+let dnrCheckConfirmed = false
 
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
@@ -15,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.status === 'success') {
                     populateFormFields(data.patient); // Fill form fields with FHIR Patient resource data
                     populateHealthFields(data.health_data); // Populate health-related fields
-                    setupDnrHandlers(dnrConfirmed);
+                    alert(dnrCheckConfirmed);
+                    setupDnrHandlers(dnrCheckConfirmed);
                 } else {
                     console.error('Error fetching patient data:', data.message);
                     alert('Could not fetch patient information. Please log in again.');
@@ -256,9 +258,10 @@ document.addEventListener('DOMContentLoaded', () => {
         healthData.forEach(record => {
                 console.log(`Processing record for type: ${record.type}`);
                 console.log("Record data:", record.data);
-                console.log("Record resource type:", record.identifier?.value());
+                alert(record.type)
 
-                let dnrConfirmed = false; // Standardwert für DNR
+
+                // let dnrConfirmed = false; // Standardwert für DNR
                 // Check for height
                 if (record.type === 'Height' && record.data?.valueQuantity) {
                     console.log("Height value:", record.data.valueQuantity.value);
@@ -311,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 // Check for pregnancy status
-                if (record.type === 'Pregnancy' && record.data?.valueString) {
+                else if (record.type === 'Pregnancy' && record.data?.valueString) {
                     console.log("Pregnancy status found:", record.data.valueString);
 
                     const pregnancyStartDate = document.querySelector('#pregnancyStartDate'); // Input field for start date
@@ -340,24 +343,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Clear the pregnancy start date (if any)
                         if (pregnancyStartDate) pregnancyStartDate.value = '';
                     }
-                } else if (record.type !== 'Pregnancy Status') {
-                    // If no pregnancy observation is found or the type doesn't match, default to "No"
-                    const pregnantNo = document.querySelector('#pregnant_no');
-                    const pregnancyDatePicker = document.querySelector('#pregnancy-date');
-                    const pregnancyStartDate = document.querySelector('#pregnancyStartDate');
-
-                    if (pregnantNo) pregnantNo.checked = true; // Mark "No" by default
-                    if (pregnancyDatePicker) pregnancyDatePicker.style.display = 'none'; // Hide date picker
-                    if (pregnancyStartDate) pregnancyStartDate.value = ''; // Clear the value
-
+                }
                     // Handle "DNR" (Do Not Resuscitate) status
-                } else if (record.resourceType === 'Consent') {
+
+                else if (record.type.trim().toUpperCase() === 'DNR') {
                     console.log("DNR status found:", record.data.valueBoolean);
 
-                    // Interpret the backend value for DNR (true/false)
-                    if (record.data?.valueBoolean === true) {
-                        dnrConfirmed = true; // DNR confirmed
-                    }
+                        dnrCheckConfirmed = true; // DNR confirmed
+
                 }
 
 
