@@ -100,13 +100,16 @@ def userPatientInfo():
             conditions.append(condition)
 
             # Create an ID-friendly version of the condition
-            processed_condition = condition.replace(' ', '-').lower()
+            processed_condition = condition.replace(' ', '-').replace('(', '').replace(')', '').lower()
+
             condition_ids.append(processed_condition)
 
     # Remove duplicates
-    conditions = list(set(conditions))
-    condition_codes = list(set(condition_codes))
-    condition_ids = list(set(condition_ids))
+    #conditions = list(set(conditions))
+    #condition_codes = list(set(condition_codes))
+    #condition_ids = list(set(condition_ids))
+    print(conditions)
+    print(condition_ids)
     return render_template('user_patient_info.html', medications=medications, manufacturers=manufacturers, conditions=conditions, condition_codes=condition_codes, condition_ids=condition_ids, zip=zip)
 
 

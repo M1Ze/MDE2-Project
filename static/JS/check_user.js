@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
         healthData.forEach(record => {
                 console.log(`Processing record for type: ${record.type}`);
                 console.log("Record data:", record.data);
-                //alert(record.type)
+              //  alert(record.type);
 
                 // Check for height
                 if (record.type === 'Height' && record.data?.valueQuantity) {
@@ -348,6 +348,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         dnrCheckConfirmed = true; // DNR confirmed
 
+                }
+
+                // Check for Cardiac pacemaker (physical object) type
+                else if (record.type === 'Cardiac pacemaker (physical object)') {
+                    const cardiac_pacemaker = document.querySelector('#condition-cardiac-pacemaker-physical-object');
+                    cardiac_pacemaker.checked = true;
+                }// Check for Hypertension (disorder) type
+                else if (record.type === 'Hypertension (disorder)') {
+                    const Hypertension = document.querySelector('#condition-hypertension-disorder');
+                    Hypertension.checked = true;
+                }// Check for Diabetes mellitus (disorder) type
+                else if (record.type === 'Diabetes mellitus (disorder)') {
+                    const Diabetes = document.querySelector('#condition-diabetes-mellitus-disorder');
+                    Diabetes.checked = true;
+                }// Check for Hearing aid (physical object) type
+                else if (record.type === 'Hearing aid (physical object)') {
+                    const HearingAid = document.querySelector('#condition-hearing-aid-physical-object');
+                    HearingAid.checked = true;
                 }
 
 
