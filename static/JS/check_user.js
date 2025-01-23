@@ -154,103 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }
 
-    function populateFormFields1(patient) {
-        console.log("Patient data received from backend:", patient);
-
-        // Adjusted field map to match the backend keys
-        const fieldMap = {
-            name: {
-                selector: ['[name="given_name"]', '[name="last_name"]'],
-                value: () => {
-                    if (patient.name) {
-                        const nameParts = patient.name.split(' ');
-                        return [
-                            nameParts.slice(0, -1).join(' ') || '', // Given name(s)
-                            nameParts[nameParts.length - 1] || ''  // Last name
-                        ];
-                    }
-                    return ['', ''];
-                },
-            },
-            birthdate: {
-                selector: '#inputBirthday',
-                value: () => {
-                    const date = new Date(patient.birthdate);
-                    return date.toISOString().split('T')[0];
-                }
-            },
-            gender: {
-                selector: '#inputGender',
-                value: () => patient.gender ? patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1) : ''
-            },
-            email: {
-                selector: '[name="email"]',
-                value: patient.email || ''
-            },
-            phone: {
-                selector: ['#inputCountryCode', '#inputPhonenumber'],
-                value: () => {
-                    const [countryCode, ...phoneNumber] = (patient.phone || '').split(' ');
-                    return [countryCode || '', phoneNumber.join(' ') || ''];
-                }
-            },
-            address: {
-                selector: '#inputAddress',
-                value: () => {
-                    // Extract city from the address
-                    const parts = patient.address.split(',');
-                    return parts.length > 1 ? parts[0].trim() : '';
-                }
-            },
-            postalCode: {
-                selector: '#inputZip',
-                value: () => {
-                    // Extract postal code from the address
-                    const parts = patient.address.split(',');
-                    return parts[parts.length - 1]?.trim().split(' ')[0] || ''; // Extract ZIP
-                }
-            },
-            city: {
-                selector: '#inputCity',
-                value: () => {
-                    // Extract city from the address
-                    const parts = patient.address.split(',');
-                    return parts.length > 1 ? parts[1].trim() : '';
-                }
-            },
-            state: {
-                selector: '#inputState',
-                value: () => {
-                    // Extract state from the address
-                    const parts = patient.address.split(',');
-                    return parts.length > 2 ? parts[2].trim().split(' ')[0] : '';
-                },
-            },
-            identifier: {
-                selector: '[name="socialsecuritynumber"]',
-                value: () => (patient.identifier ? patient.identifier.slice(0, 4) : '')
-            },
-
-        }
-
-        // Populate form fields using the field map
-        for (const [key, {selector, value}] of Object.entries(fieldMap)
-            ) {
-            const resolvedValue = typeof value === 'function' ? value() : value;
-
-            if (Array.isArray(selector) && Array.isArray(resolvedValue)) {
-                selector.forEach((sel, index) => {
-                    const element = document.querySelector(sel);
-                    if (element) element.value = resolvedValue[index];
-                });
-            } else {
-                const element = document.querySelector(selector);
-                if (element) element.value = resolvedValue;
-            }
-        }
-        // Call setupPregnancySectionVisibility after fields are populated
-        setupPregnancySectionVisibility();
-    }
 
     function populateHealthFields(healthData) {
         console.log("Health data received from backend:", healthData);
@@ -367,8 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const HearingAid = document.querySelector('#condition-hearing-aid-physical-object');
                     HearingAid.checked = true;
                 }
-
-
 
 
             }
