@@ -1,4 +1,5 @@
 // user_patient_info.js
+let dnrConfirmed = false;
 
 const today = new Date();
 const yyyy = today.getFullYear();
@@ -41,11 +42,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const patient = createPatientData();
         console.log(patient);
         const observations = createObservations();
+        const consent = createConsentData();
 
         // Build request payload
         const payload = {patient};
         if (observations.length > 0) {
             payload.observations = observations;
+        }
+        if (consent.consent) {
+            payload.consent = consent;
         }
 
         const token = localStorage.getItem('token');
@@ -153,6 +158,9 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmButton.style.display = 'none';
             abortButton.style.display = 'inline-block';
             updateButtonStates();
+
+            // Set the flag to true since the user confirmed DNR
+            dnrConfirmed = true;
         });
 
         abortButton.addEventListener('click', () => {
@@ -161,6 +169,9 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmButton.style.display = 'inline-block';
             abortButton.style.display = 'none';
             updateButtonStates();
+
+            // Set the flag to false since the user confirmed DNR
+             dnrConfirmed = false;
         });
 
         function updateButtonStates() {
@@ -238,208 +249,91 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createObservations() {
-    const observations = [];
-
-    // Height Observation
-    const heightValue = document.querySelector('#inputHeight')?.value.trim();
-    const heightUnit = document.querySelector('input[name="height_unit"]:checked')?.value;
-    if (heightValue && heightUnit) {
-        observations.push({
-            observation: {
-                identifier: `obs-8302-2`, // LOINC code for height
-                type: "Height",
-                data: `${heightValue} ${heightUnit}`,
-                data_aqu_datetime: new Date().toISOString()
-            }
-        });
-    }
-
-    // Weight Observation
-    const weightValue = document.querySelector('#inputWeight')?.value.trim();
-    const weightUnit = document.querySelector('input[name="weight_unit"]:checked')?.value;
-    if (weightValue && weightUnit) {
-        observations.push({
-            observation: {
-                identifier: `obs-29463-7`, // LOINC code for weight
-                type: "Weight",
-                data: `${weightValue} ${weightUnit}`,
-                data_aqu_datetime: new Date().toISOString()
-            }
-        });
-    }
-
-    // Blood Type Observation
-    const bloodType = document.querySelector('input[name="blood_type"]:checked')?.value;
-    if (bloodType) {
-        observations.push({
-            observation: {
-                identifier: `obs-883-9`,
-                type: "Blood Type",
-                data: bloodType,
-                data_aqu_datetime: new Date().toISOString()
-            }
-        });
-    }
-
-    // Rhesus Factor Observation
-    const rhesusFactor = document.querySelector('input[name="rhesus_factor"]:checked')?.value;
-    if (rhesusFactor) {
-        observations.push({
-            observation: {
-                identifier: `obs-7799-0`,
-                type: "Rhesus Factor",
-                data: rhesusFactor,
-                data_aqu_datetime: new Date().toISOString()
-            }
-        });
-    }
-
-    // Pregnancy Observation
-    const gender = document.querySelector('#inputGender')?.value.toLowerCase();
-    const pregnancyStatus = document.querySelector('input[name="pregnancy_status"]:checked')?.value;
-    const pregnancyStartDate = document.querySelector('input[name="pregnancy_start_date"]')?.value.trim();
-    if (['female', 'other', 'unknown'].includes(gender) && pregnancyStatus === 'yes' && pregnancyStartDate) {
-        observations.push({
-            observation: {
-                identifier: `obs-82810-3`,
-                type: "Pregnancy",
-                data: "Pregnant",
-                data_aqu_datetime: pregnancyStartDate
-            }
-        });
-    }
-
-    return observations;
-}
-
-    // Gather Observations Function
-    function gatherObservations() {
         const observations = [];
 
         // Height Observation
-        const heightValue = document.querySelector('#inputHeight')?.value.trim() || null;
-        const heightUnit = document.querySelector('input[name="height_unit"]:checked')?.value || null;
-        console.log("Height:", heightValue, heightUnit);
-        if (heightValue) {
-            observations.push(createObservationData('Height', heightValue, heightUnit));
+        const heightValue = document.querySelector('#inputHeight')?.value.trim();
+        const heightUnit = document.querySelector('input[name="height_unit"]:checked')?.value;
+        if (heightValue && heightUnit) {
+            observations.push({
+                observation: {
+                    identifier: `obs-8302-2`, // LOINC code for height
+                    type: "Height",
+                    data: `${heightValue} ${heightUnit}`,
+                    data_aqu_datetime: new Date().toISOString()
+                }
+            });
         }
 
         // Weight Observation
-        const weightValue = document.querySelector('#inputWeight')?.value.trim() || null;
-        const weightUnit = document.querySelector('input[name="weight_unit"]:checked')?.value || null;
-        console.log("Weight:", weightValue, weightUnit);
-        if (weightValue) {
-            observations.push(createObservationData('Weight', weightValue, weightUnit));
+        const weightValue = document.querySelector('#inputWeight')?.value.trim();
+        const weightUnit = document.querySelector('input[name="weight_unit"]:checked')?.value;
+        if (weightValue && weightUnit) {
+            observations.push({
+                observation: {
+                    identifier: `obs-29463-7`, // LOINC code for weight
+                    type: "Weight",
+                    data: `${weightValue} ${weightUnit}`,
+                    data_aqu_datetime: new Date().toISOString()
+                }
+            });
         }
 
-        // Blood Type and Rhesus Factor Observation
-        const bloodType = document.querySelector('input[name="blood_type"]:checked')?.value || null;
-        const rhesusFactor = document.querySelector('input[name="rhesus_factor"]:checked')?.value || null;
-        console.log("Blood Type:", bloodType);
-        console.log("Rhesus Factor:", rhesusFactor);
-        if (bloodType && rhesusFactor) {
-            observations.push(createObservationData('Blood Type', bloodType, null));
-            observations.push(createObservationData('Rhesus Factor', rhesusFactor, null));
+        // Blood Type Observation
+        const bloodType = document.querySelector('input[name="blood_type"]:checked')?.value;
+        if (bloodType) {
+            observations.push({
+                observation: {
+                    identifier: `obs-883-9`,
+                    type: "Blood Type",
+                    data: bloodType,
+                    data_aqu_datetime: new Date().toISOString()
+                }
+            });
         }
 
-        // Pregnancy Status Observation
-        const gender = document.querySelector('#inputGender')?.value.toLowerCase() || null;
-        const pregnancyStatus = document.querySelector('input[name="pregnancy_status"]:checked')?.value || null;
-        const pregnancyWeeks = document.querySelector('#pregnancyWeeks')?.value.trim() || null;
-        console.log("Gender:", gender);
-        console.log("Pregnancy Status:", pregnancyStatus);
-        console.log("Pregnancy Weeks:", pregnancyWeeks);
-
-        if (['female', 'unknown', 'other'].includes(gender) && pregnancyStatus === 'yes' && pregnancyWeeks) {
-            const pregnancyObservation = createObservationData('Pregnancy Status', "Pregnant", null);
-            pregnancyObservation.pregnancyWeeks = pregnancyWeeks;
-            observations.push(pregnancyObservation);
+        // Rhesus Factor Observation
+        const rhesusFactor = document.querySelector('input[name="rhesus_factor"]:checked')?.value;
+        if (rhesusFactor) {
+            observations.push({
+                observation: {
+                    identifier: `obs-7799-0`,
+                    type: "Rhesus Factor",
+                    data: rhesusFactor,
+                    data_aqu_datetime: new Date().toISOString()
+                }
+            });
         }
 
-        console.log("Observations Gathered:", observations);
+        // Pregnancy Observation
+        const gender = document.querySelector('#inputGender')?.value.toLowerCase();
+        const pregnancyStatus = document.querySelector('input[name="pregnancy_status"]:checked')?.value;
+        const pregnancyStartDate = document.querySelector('input[name="pregnancy_start_date"]')?.value.trim();
+        if (['female', 'other', 'unknown'].includes(gender) && pregnancyStatus === 'yes' && pregnancyStartDate) {
+            observations.push({
+                observation: {
+                    identifier: `obs-82810-3`,
+                    type: "Pregnancy",
+                    data: "Pregnant",
+                    data_aqu_datetime: pregnancyStartDate
+                }
+            });
+        }
+
         return observations;
     }
 
-    function createObservationData() {
-    // Extract height
-    const heightValue = document.querySelector('input[name="height"]').value.trim();
-    const heightUnit = document.querySelector('input[name="height_unit"]:checked')?.value || null;
-
-    // Extract weight
-    const weightValue = document.querySelector('input[name="weight"]').value.trim();
-    const weightUnit = document.querySelector('input[name="weight_unit"]:checked');
-
-    // Extract blood type
-    const bloodType = document.querySelector('input[name="blood_type"]:checked')?.value;
-
-    // Extract rhesus factor
-    const rhesusFactor = document.querySelector('input[name="rhesus_factor"]:checked')?.value;
-
-    // Extract pregnancy status
-    const pregnancyStatus = document.querySelector('input[name="pregnancy_status"]:checked')?.value;
-    let pregnancyStartDate = null;
-
-    if (pregnancyStatus === 'yes') {
-        pregnancyStartDate = document.querySelector('input[name="pregnancy_start_date"]').value.trim();
-    }
-
-    // Create observation data array
-    const observations = [];
-
-    // Add height observation if valid
-    if (heightValue && heightUnit) {
-        observations.push({
-            observation: {
-            identifier: `obs-8302-2`, // LOINC code for height
-            type: "Height",
-            data: `${heightValue} cm`,
-            data_aqu_datetime: new Date().toISOString() // Current timestamp
+    function createConsentData() {
+    const dnrCheckbox = document.querySelector('#dnr-checkbox'); // Checkbox elementconst abortButton = document.getElementById('abort-dnr-button');
+    if (dnrCheckbox && dnrCheckbox.checked && dnrConfirmed) {
+        // Return DNR consent object if checkbox is checked
+        return {
+            consent: {
+                status: "active"
             }
-        });
+        };
     }
-
-    // Add weight observation if valid
-    if (weightValue && weightUnit) {
-        observations.push({
-            identifier: `obs-29463-7`, // LOINC code for weight
-            type: "Weight",
-            data: `${weightValue} kg`,
-            data_aqu_datetime: new Date().toISOString() // Current timestamp
-        });
-    }
-
-    // Add blood type observation if valid
-    if (bloodType) {
-        observations.push({
-            identifier: `obs-883-9`, // LOINC code for blood type
-            type: "Blood Type",
-            data: bloodType,
-            data_aqu_datetime: new Date().toISOString() // Current timestamp
-        });
-    }
-
-    // Add rhesus factor observation if valid
-    if (rhesusFactor) {
-        observations.push({
-            identifier: `obs-7799-0`, // LOINC code for rhesus factor
-            type: "Rhesus Factor",
-            data: rhesusFactor,
-            data_aqu_datetime: new Date().toISOString() // Current timestamp
-        });
-    }
-
-    // Add pregnancy observation if pregnant
-    if (pregnancyStatus === 'yes' && pregnancyStartDate) {
-        observations.push({
-            identifier: `obs-82810-3`, // LOINC code for pregnancy status
-            type: "Pregnancy",
-            data: "Pregnant",
-            data_aqu_datetime: pregnancyStartDate // Use the selected pregnancy start date
-        });
-    }
-
-    // Return the observations array
-    return observations;
+    // Return empty object if checkbox is not checked
+    return {};
 }
-
 });

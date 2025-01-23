@@ -398,8 +398,6 @@ def save_observations(observations, patient):
     if not isinstance(observations, list):
         raise ValueError("Invalid observations format, expected a list")
 
-    print(observations)
-
     for obs_wrapper in observations:
         obs_data = obs_wrapper.get('observation')
         if not isinstance(obs_data, dict):
@@ -409,19 +407,12 @@ def save_observations(observations, patient):
         try:
             observation = ObservationData()
             observation.populate_from_dict(obs_data)
-            print(observation.data)
 
             data_aqu_datetime = observation.data_aqu_datetime
             if isinstance(data_aqu_datetime, str):
                 data_aqu_datetime = datetime.fromisoformat(data_aqu_datetime.replace("Z", "+00:00"))
 
-            print("Here:fhir")
-            print(observation.create_fhir())
-
             h_data_json = json.loads(json.dumps(observation.create_fhir(), separators=(',', ':')))
-
-
-
 
             existing_obs = HealthData.query.filter_by(
                 patient_id=patient.id,
@@ -449,16 +440,30 @@ def save_consent(consent_data, patient):
 
     try:
         consent = ConsentData()
-        consent.populate_from_dict(consent_data)
+        consent.populate_from_dict(consent_data,patient)
+        consent_fhire_json = json.loads(json.dumps(consent.create_fhir()))
+        print(consent_fhire_json)
 
-        existing_consent = HealthData.query.filter_by(patient_id=patient.id).first()
+        data_aqu_datetime = datetime.now()
+        if isinstance(data_aqu_datetime, str):
+            data_aqu_datetime = datetime.fromisoformat(data_aqu_datetime.replace("Z", "+00:00"))
+
+        existing_consent = HealthData.query.filter_by(
+            patient_id=patient.id,
+            data_type="DNR",
+        ).first()
+
         if existing_consent:
-            existing_consent.data = json.dumps(consent.create_fhir())
+            existing_consent.h_data = consent_fhire_json
         else:
+            print('sec')
             new_consent = HealthData(
                 patient_id=patient.id,
-                data=json.dumps(consent.create_fhir())
+                data_type="DNR",
+                data_aqu_datetime=data_aqu_datetime,
+                h_data=consent_fhire_json
             )
+            print(new_consent)
             db.session.add(new_consent)
 
     except Exception as e:
