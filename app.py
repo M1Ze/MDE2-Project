@@ -34,7 +34,7 @@ FHIR_SERVER_URL = "http://localhost:8080/fhir"
 db.init_app(app)
 
 with app.app_context():
-    #db.drop_all()
+    # db.drop_all()
     db.create_all()
 
 
@@ -108,8 +108,7 @@ def userPatientInfo():
     #conditions = list(set(conditions))
     #condition_codes = list(set(condition_codes))
     #condition_ids = list(set(condition_ids))
-    print(conditions)
-    print(condition_ids)
+
     return render_template('user_patient_info.html', medications=medications, manufacturers=manufacturers, conditions=conditions, condition_codes=condition_codes, condition_ids=condition_ids, zip=zip)
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -400,22 +399,42 @@ def save_medications(medications, patient):
     if not isinstance(medications, list):
         return  # No medications to process
 
+    print(medications)
+
     try:
         for med in medications:
             medication = MedicationData()
-            medication.populate_from_dict(med)
+
+            file_path = 'Allgemein/snomed_ct_codes_medication.csv'
+            medication_dict = csv_to_dict(file_path)
+
+            key_to_find = med.get('medication')
+            if key_to_find in medication_dict:
+                medication.code = medication_dict[key_to_find]
+
+            medication.manufacturer = med.get('manufacturer')
 
             existing_med = HealthData.query.filter_by(
                 patient_id=patient.id,
-                medication_name=medication.name
+                data_type = med.get('medication')
             ).first()
 
+            data_aqu_datetime = datetime.now()
+            if isinstance(data_aqu_datetime, str):
+                data_aqu_datetime = datetime.fromisoformat(data_aqu_datetime.replace("Z", "+00:00"))
+
+            medication_fhir_resource = json.loads(json.dumps(medication.create_fhir()))
+
             if existing_med:
-                existing_med.data = json.dumps(medication.create_fhir())
+                existing_med.data = medication_fhir_resource
+                existing_med.data_aqu_datetime = data_aqu_datetime
+
             else:
                 new_med = HealthData(
                     patient_id=patient.id,
-                    data=json.dumps(medication.create_fhir())
+                    data_type=med.get('medication'),
+                    data_aqu_datetime = data_aqu_datetime,
+                    h_data=medication_fhir_resource
                 )
                 db.session.add(new_med)
 
@@ -470,7 +489,6 @@ def save_allergies(allergies, patient):
     if not isinstance(allergies, list):
         return  # No allergies to process
 
-    print(allergies)
     try:
         for allergy in allergies:
             allergy_data = AllergyIntoleranceData()

@@ -380,9 +380,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // retrieve json
     return allergies;
 }
-    function createMedicationData(){
-        return [];
-    }
+
+    function createMedicationData() {
+    const medicationList = document.querySelectorAll('#medication-list tr');
+    const medications = [];
+
+    // Iterate over each row in the medication list table
+    medicationList.forEach(row => {
+        const cells = row.querySelectorAll('td'); // Get all table cells in the row
+
+        // Ensure the row has data (skips empty table rows)
+        if (cells.length >= 2) {
+            const manufacturer = cells[0].textContent.trim(); // First cell: Manufacturer
+            const medication = cells[1].textContent.trim(); // Second cell: Medication
+
+            // Add the manufacturer-medication pair to the medications array
+            medications.push({
+                manufacturer: manufacturer,
+                medication: medication
+            });
+        }
+    });
+
+    return medications; // Return the array of medication objects
+}
 });
 
 document.addEventListener('DOMContentLoaded', () => {
