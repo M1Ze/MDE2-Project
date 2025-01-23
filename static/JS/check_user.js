@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         healthData.forEach(record => {
                 console.log(`Processing record for type: ${record.type}`);
                 console.log("Record data:", record.data);
-              //  alert(record.type);
+                //alert(record.type);
 
                 // Check for height
                 if (record.type === 'Height' && record.data?.valueQuantity) {
@@ -271,6 +271,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     HearingAid.checked = true;
                 }
 
+                else if (record.type === 'Peanut') {
+                    const Peanut = document.querySelector('#allergy-peanut');
+                    Peanut.checked = true;
+                }
+
+                else if (record.type === 'Lactose') {
+                    const Lactose = document.querySelector('#allergy-lactose');
+                    Lactose.checked = true;
+                }
+
+                else if (record.type === 'Penicillin') {
+                    const Penicillin = document.querySelector('#allergy-penicillin');
+                    Penicillin.checked = true;
+                }
+
+                else if (record.type === 'Soy') {
+                    const Penicillin = document.querySelector('#allergy-soy');
+                    Penicillin.checked = true;
+                }
+
+                else if (record.type === 'Shellfish') {
+                    const Penicillin = document.querySelector('#allergy-shellfish');
+                    Penicillin.checked = true;
+                }
 
             }
         )
