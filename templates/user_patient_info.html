@@ -296,7 +296,9 @@
                         <label for="medication_manufacturer" class="form-label">Manufacturer</label>
                         <select id="medication_manufacturer" name="medication_manufacturer" class="form-select">
                             <option value="" disabled selected>Select Manufacturer</option>
-                            <!-- Dynamic options will be added here -->
+                            {% for manufacturer in manufacturers %}
+                                 <option value="{{ manufacturer }}">{{ manufacturer }}</option>
+                            {% endfor %}
                         </select>
                     </div>
 
@@ -305,7 +307,9 @@
                         <label for="medication_name" class="form-label">Medication</label>
                         <select id="medication_name" name="medication_name" class="form-select">
                             <option value="" disabled selected>Select Medication</option>
-                            <!-- Dynamic options will be added here -->
+                            {% for medication in medications %}
+                                <option value="{{ medication }}">{{ medication }}</option>
+                            {% endfor %}
                         </select>
                     </div>
 

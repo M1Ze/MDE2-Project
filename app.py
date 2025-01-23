@@ -1,4 +1,6 @@
 # app.py
+import csv
+
 from flask import Flask, render_template, request, redirect, jsonify
 import json
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -29,7 +31,7 @@ FHIR_SERVER_URL = "http://localhost:8080/fhir"
 db.init_app(app)
 
 with app.app_context():
-    # db.drop_all()
+    #db.drop_all()
     db.create_all()
 
 
@@ -63,7 +65,23 @@ def index():
 
 @app.route('/userPatientInfo')
 def userPatientInfo():
-    return render_template('user_patient_info.html')
+    medications = []
+    manufacturers = []
+
+    # Read the CSV file
+    with open('Allgemein/snomed_ct_codes_medication.csv', newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';')  # Specify the correct delimiter
+        next(reader)  # Skip the header row
+        for row in reader:
+            medication_name = row[0]
+            manufacturer = row[2]
+            medications.append(medication_name)
+            manufacturers.append(manufacturer)
+
+    # Remove duplicates
+    medications = list(set(medications))
+    manufacturers = list(set(manufacturers))
+    return render_template('user_patient_info.html', medications=medications, manufacturers=manufacturers)
 
 
 from datetime import datetime
