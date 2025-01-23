@@ -6,6 +6,8 @@ import json
 from werkzeug.security import generate_password_hash, check_password_hash
 
 import requests
+
+from csv_handler import csv_to_dict
 from db_models import db, Patient, HealthData, User
 from fhir_data_processing.condition_data import ConditionData
 from fhir_data_processing.patient_data import PatientData
@@ -398,6 +400,7 @@ def save_patient_data():
         if isinstance(patient, tuple):  # Check if an error response is returned
             return patient
 
+        print(data)
         save_observations(data.get('observations', []), patient)
         save_consent(data.get('consent', {}), patient)
         save_medications(data.get('medications', []), patient)
@@ -483,7 +486,6 @@ def save_consent(consent_data, patient):
         consent = ConsentData()
         consent.populate_from_dict(consent_data,patient)
         consent_fhire_json = json.loads(json.dumps(consent.create_fhir()))
-        print(consent_fhire_json)
 
         data_aqu_datetime = datetime.now()
         if isinstance(data_aqu_datetime, str):
@@ -496,15 +498,14 @@ def save_consent(consent_data, patient):
 
         if existing_consent:
             existing_consent.h_data = consent_fhire_json
+            existing_consent.data_aqu_datetime = data_aqu_datetime
         else:
-            print('sec')
             new_consent = HealthData(
                 patient_id=patient.id,
                 data_type="DNR",
                 data_aqu_datetime=data_aqu_datetime,
                 h_data=consent_fhire_json
             )
-            print(new_consent)
             db.session.add(new_consent)
 
     except Exception as e:
@@ -543,19 +544,36 @@ def save_conditions(conditions, patient):
     try:
         for cond in conditions:
             condition = ConditionData()
-            condition.populate_from_dict(cond)
+
+            file_path = 'Allgemein/snomed_ct_codes_condition.csv'
+            conditions_dict = csv_to_dict(file_path)
+
+            key_to_find = cond.get('condition')
+            if key_to_find in conditions_dict:
+                condition.condition_code = conditions_dict[key_to_find]
+
+            data_aqu_datetime = datetime.now()
+            if isinstance(data_aqu_datetime, str):
+                data_aqu_datetime = datetime.fromisoformat(data_aqu_datetime.replace("Z", "+00:00"))
+
+            condition.recorded_date = data_aqu_datetime
+
+            condition_fhire_json = json.loads(json.dumps(condition.create_fhir()))
 
             existing_condition = HealthData.query.filter_by(
                 patient_id=patient.id,
-                condition_name=condition.name
+                data_type=cond.get('condition')
             ).first()
 
             if existing_condition:
-                existing_condition.data = json.dumps(condition.create_fhir())
+                existing_condition.h_data = condition_fhire_json
+                existing_condition.data_aqu_datetime = data_aqu_datetime
             else:
                 new_condition = HealthData(
                     patient_id=patient.id,
-                    data=json.dumps(condition.create_fhir())
+                    data_type=cond.get('condition'),
+                    data_aqu_datetime=data_aqu_datetime,
+                    h_data=condition_fhire_json
                 )
                 db.session.add(new_condition)
 
