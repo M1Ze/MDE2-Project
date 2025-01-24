@@ -436,7 +436,7 @@ def save_medications(medications, patient):
 
             medication_fhir_resource = json.loads(json.dumps(medication.create_fhir()))
 
-            fhir_id=save_resource("MedicationRequest",json.loads(medication_fhir_resource))
+            fhir_id=save_resource("Medication",json.loads(medication_fhir_resource))
 
 
             if existing_med:
