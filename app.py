@@ -1,5 +1,6 @@
 # app.py
 import csv
+from traceback import print_tb
 
 from flask import Flask, render_template, request, redirect, jsonify
 import json
@@ -16,12 +17,13 @@ from fhir_data_processing.medication_data import MedicationData
 from fhir_data_processing.consent_data import ConsentData
 from fhir_data_processing.care_plan_data import CarePlanData
 from fhir_data_processing.allergy_intolerance_data import AllergyIntoleranceData
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import generate_qr
 import jwt
 import json
 from datetime import datetime
-
+import fhir_server_interface
+from fhir_server_interface import save_resource
 
 from generate_qr import generate_qr_code_binary
 
@@ -127,16 +129,20 @@ def register():
         patient_register_data_json = (
             json.dumps(patient_register_data) if isinstance(patient_register_data, dict) else patient_register_data
         )
-        print(patient_register_data_json)
         # Use PatientData to parse and validate the FHIR Patient resource
         # muss nochmal überarbeiten
         patient_data = PatientData()
         patient_data.populate_from_dict(patient_register_data)
-        print(patient_data)
 
-        patient_fhir_resource = patient_data.create_fhir()
 
-        print(patient_fhir_resource)
+        patient_fhir_resource = json.loads(patient_data.create_fhir())
+        resource_type = patient_fhir_resource.get("resourceType"),
+        print(resource_type)
+
+        fhir_id = save_resource("Patient",patient_fhir_resource)
+
+        print(f"Fhir_ID: {fhir_id}")
+
 
         # Extract necessary fields
         email = patient_data.email
@@ -158,7 +164,8 @@ def register():
             name=f"{given_name} {last_name}",
             identifier=social_security_number,
             qr_code=generate_qr_code_binary(social_security_number),
-            pat_data=json.loads(patient_fhir_resource)  # Save the entire Patient
+            pat_data=patient_fhir_resource ,# Save the entire Patient
+            fhir_id = fhir_id
         )
 
         try:
@@ -340,11 +347,14 @@ def save_observations(observations, patient):
             observation = ObservationData()
             observation.populate_from_dict(obs_data)
 
-            data_aqu_datetime = observation.data_aqu_datetime
-            if isinstance(data_aqu_datetime, str):
-                data_aqu_datetime = datetime.fromisoformat(data_aqu_datetime.replace("Z", "+00:00"))
+            data_aqu_datetime = datetime.now(timezone.utc).replace(microsecond=0)  # Remove microseconds
+            # Convert to ISO 8601 format for FHIR
+            data_aqu_datetime_iso = data_aqu_datetime.isoformat()
 
-            h_data_json = json.loads(json.dumps(observation.create_fhir(), separators=(',', ':')))
+            observation_fhire_resource = json.loads(json.dumps(observation.create_fhir(), separators=(',', ':')))
+
+            print(observation_fhire_resource)
+            fhir_id=save_resource("Observation",json.loads(observation_fhire_resource))
 
             existing_obs = HealthData.query.filter_by(
                 patient_id=patient.id,
@@ -352,14 +362,15 @@ def save_observations(observations, patient):
             ).first()
 
             if existing_obs:
-                existing_obs.h_data = h_data_json
+                existing_obs.h_data = observation_fhire_resource
                 existing_obs.data_aqu_datetime = data_aqu_datetime
             else:
                 new_obs = HealthData(
                     patient_id=patient.id,
                     data_type=observation.type,
                     data_aqu_datetime=data_aqu_datetime,
-                    h_data=h_data_json
+                    h_data=observation_fhire_resource,
+                    fhir_id=fhir_id,
                 )
                 db.session.add(new_obs)
 
@@ -376,9 +387,11 @@ def save_consent(consent_data, patient):
         consent.populate_from_dict(consent_data,patient)
         consent_fhire_json = json.loads(json.dumps(consent.create_fhir()))
 
-        data_aqu_datetime = datetime.now()
-        if isinstance(data_aqu_datetime, str):
-            data_aqu_datetime = datetime.fromisoformat(data_aqu_datetime.replace("Z", "+00:00"))
+        fhir_id=save_resource("Consent",json.loads(consent_fhire_json))
+
+        data_aqu_datetime = datetime.now(timezone.utc).replace(microsecond=0)  # Remove microseconds
+        # Convert to ISO 8601 format for FHIR
+        data_aqu_datetime_iso = data_aqu_datetime.isoformat()
 
         existing_consent = HealthData.query.filter_by(
             patient_id=patient.id,
@@ -393,7 +406,8 @@ def save_consent(consent_data, patient):
                 patient_id=patient.id,
                 data_type="DNR",
                 data_aqu_datetime=data_aqu_datetime,
-                h_data=consent_fhire_json
+                h_data=consent_fhire_json,
+                fhir_id=fhir_id,
             )
             db.session.add(new_consent)
 
@@ -423,12 +437,14 @@ def save_medications(medications, patient):
                 data_type = med.get('medication')
             ).first()
 
-            data_aqu_datetime = datetime.now()
-            if isinstance(data_aqu_datetime, str):
-                data_aqu_datetime = datetime.fromisoformat(data_aqu_datetime.replace("Z", "+00:00"))
+            data_aqu_datetime = datetime.now(timezone.utc).replace(microsecond=0)  # Remove microseconds
+            # Convert to ISO 8601 format for FHIR
+            data_aqu_datetime_iso = data_aqu_datetime.isoformat()
 
             medication_fhir_resource = json.loads(json.dumps(medication.create_fhir()))
-            print(medication_fhir_resource)
+
+            fhir_id=save_resource("MedicationRequest",json.loads(medication_fhir_resource))
+
 
             if existing_med:
                 existing_med.data = medication_fhir_resource
@@ -439,7 +455,8 @@ def save_medications(medications, patient):
                     patient_id=patient.id,
                     data_type=med.get('medication'),
                     data_aqu_datetime = data_aqu_datetime,
-                    h_data=medication_fhir_resource
+                    h_data=medication_fhir_resource,
+                    fhir_id=fhir_id,
                 )
                 db.session.add(new_med)
 
@@ -461,14 +478,16 @@ def save_conditions(conditions, patient):
             if key_to_find in conditions_dict:
                 condition.condition_code = conditions_dict[key_to_find]
 
-            data_aqu_datetime = datetime.now()
-            if isinstance(data_aqu_datetime, str):
-                data_aqu_datetime = datetime.fromisoformat(data_aqu_datetime.replace("Z", "+00:00"))
+            data_aqu_datetime = datetime.now(timezone.utc).replace(microsecond=0)  # Remove microseconds
+            # Convert to ISO 8601 format for FHIR
+            data_aqu_datetime_iso = data_aqu_datetime.isoformat()
 
             condition.recorded_date = data_aqu_datetime
-            condition.patient_id = patient.identifier
+            condition.patient_identifier = patient.fhir_id
 
             condition_fhire_json = json.loads(json.dumps(condition.create_fhir()))
+
+            fhir_id=save_resource("Condition",json.loads(condition_fhire_json))
 
             existing_condition = HealthData.query.filter_by(
                 patient_id=patient.id,
@@ -483,7 +502,8 @@ def save_conditions(conditions, patient):
                     patient_id=patient.id,
                     data_type=cond.get('condition'),
                     data_aqu_datetime=data_aqu_datetime,
-                    h_data=condition_fhire_json
+                    h_data=condition_fhire_json,
+                    fhir_id=fhir_id,
                 )
                 db.session.add(new_condition)
 
@@ -510,9 +530,11 @@ def save_allergies(allergies, patient):
 
             allergy_fhire_json = json.loads(json.dumps(allergy_data.create_fhir()))
 
-            data_aqu_datetime = datetime.now()
-            if isinstance(data_aqu_datetime, str):
-                data_aqu_datetime = datetime.fromisoformat(data_aqu_datetime.replace("Z", "+00:00"))
+            fhir_id=save_resource("AllergyIntolerance",json.loads(allergy_fhire_json))
+
+            data_aqu_datetime = datetime.now(timezone.utc).replace(microsecond=0)  # Remove microseconds
+            # Convert to ISO 8601 format for FHIR
+            data_aqu_datetime_iso = data_aqu_datetime.isoformat()
 
             if existing_allergy:
                 existing_allergy.h_data = allergy_fhire_json
@@ -522,7 +544,8 @@ def save_allergies(allergies, patient):
                     patient_id=patient.id,
                     data_type=allergy_data.type,
                     data_aqu_datetime=data_aqu_datetime,
-                    h_data=allergy_fhire_json
+                    h_data=allergy_fhire_json,
+                    fhir_id=fhir_id,
                 )
                 db.session.add(new_allergy)
 

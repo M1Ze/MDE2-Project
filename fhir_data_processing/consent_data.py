@@ -43,11 +43,11 @@ class ConsentData:
         consent_resource = Consent(
             identifier=[
                 {
-                    "system": "http://example.org/fhir/identifier",
+                    "system": "http://svc.co.at/CodeSystem/ecard-svt-cs",
                     "value": self.identifier,
                 }
             ] if self.identifier else None,
-            status=self.status if self.status else 'Draft', #default
+            status=self.status if self.status else 'draft', #default
             category=[
                 CodeableConcept(
                     coding=[{"code": "dnr", "display": "Do Not Resuscitate"}]
@@ -115,6 +115,6 @@ class ConsentData:
 
     def populate_from_dict(self,data,patient):
 
-        self.patient_id = patient.id
+        self.patient_id = patient.fhir_id
         self.identifier = patient.identifier
         self.status = data.get("status")
