@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
             birthdate: {
                 selector: '#birthdate',
                 value: () => {
-                    return `${patient.birthdate}`;
+                    return formatDate(patient.birthdate);
                 }
             },
             gender: {
@@ -125,6 +125,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // Iterate over each health record
         healthData.forEach((record) => {
             console.log("Processing record:", record);
+
+            // Check if the record is for 'Consent' (DNR)
+            if (record.data?.resourceType === 'Consent') {
+                console.log("DNR consent found in record:", record);
+
+                // Show the DNR banner
+                const dnrBanner = document.getElementById('dnr-banner');
+                if (dnrBanner) dnrBanner.style.display = 'block'; // Make the banner visible
+            }
 
             // Für den Typ "Medication" den Medikamentennamen hinzufügen
             if (record.data?.resourceType === 'Medication') {
