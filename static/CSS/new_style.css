@@ -19,11 +19,11 @@
 /* Centered Logo Styling */
 .custom-navbar .navbar-brand {
     position: absolute; /* Keeps the logo in the center */
-    left: 50%;          /* Aligns it horizontally to the middle */
+    left: 50%; /* Aligns it horizontally to the middle */
     transform: translateX(-50%); /* Centers it perfectly */
-    z-index: 1;         /* Ensures it stays on top of collapsible content */
-    padding: 0 20px;    /* Adds spacing around the logo */
-    font-size: 2.5rem;  /* Larger logo text size */
+    z-index: 1; /* Ensures it stays on top of collapsible content */
+    padding: 0 20px; /* Adds spacing around the logo */
+    font-size: 2.5rem; /* Larger logo text size */
     white-space: nowrap; /* Prevents text wrapping */
 }
 
@@ -38,7 +38,8 @@
 }
 
 /* Responsive Font Size for Navbar */
-@media (max-width: 992px) { /* Medium screens */
+@media (max-width: 992px) {
+    /* Medium screens */
     .custom-navbar .navbar-brand {
         font-size: 2.3rem; /* Reduce logo size slightly */
     }
@@ -48,7 +49,8 @@
     }
 }
 
-@media (max-width: 768px) { /* Small screens */
+@media (max-width: 768px) {
+    /* Small screens */
     .custom-navbar .navbar-brand {
         font-size: 2rem; /* Reduce logo size further */
     }
@@ -58,7 +60,8 @@
     }
 }
 
-@media (max-width: 576px) { /* Extra small screens */
+@media (max-width: 576px) {
+    /* Extra small screens */
     .custom-navbar .navbar-brand {
         font-size: 1.8rem; /* Further reduce logo text */
     }
@@ -67,6 +70,7 @@
         font-size: 1rem; /* Smaller link text */
     }
 }
+
 /* Custom Button */
 .btn-custom {
     background-color: #1A3F47; /* Match the navbar color */
@@ -121,6 +125,23 @@ footer {
     justify-content: center;
     min-height: 100vh; /* Full viewport height */
     background-color: #f4f4f9; /* Light background for login page */
+}
+
+.top-right-button-container {
+    position: absolute;
+    top: 120px;
+    right: 100px;
+    z-index: 1000; /* Ensures it appears above other content */
+}
+
+.btn-sm-custom {
+    background-color: #1A3F47;
+    color: white !important; /* Make text white */
+    padding: 5px 10px;
+    font-size: smaller;
+}
+.btn-sm-custom:hover {
+     background-color: #1A3F47;
 }
 
 /*.navbar-brand {*/

@@ -1,30 +1,23 @@
 # app.py
 import csv
-from traceback import print_tb
-
-from flask import Flask, render_template, request, redirect, jsonify
 import json
-from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+from datetime import timedelta, timezone
 
+import jwt
 import requests
+from flask import Flask, render_template, request, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from csv_handler import csv_to_dict, get_medication_dict
 from db_models import db, Patient, HealthData, User
-from fhir_data_processing.condition_data import ConditionData
-from fhir_data_processing.patient_data import PatientData
-from fhir_data_processing.observation_data import ObservationData
-from fhir_data_processing.medication_data import MedicationData
-from fhir_data_processing.consent_data import ConsentData
-from fhir_data_processing.care_plan_data import CarePlanData
 from fhir_data_processing.allergy_intolerance_data import AllergyIntoleranceData
-from datetime import datetime, timedelta, timezone
-import generate_qr
-import jwt
-import json
-from datetime import datetime
-import fhir_server_interface
+from fhir_data_processing.condition_data import ConditionData
+from fhir_data_processing.consent_data import ConsentData
+from fhir_data_processing.medication_data import MedicationData
+from fhir_data_processing.observation_data import ObservationData
+from fhir_data_processing.patient_data import PatientData
 from fhir_server_interface import save_resource
-
 from generate_qr import generate_qr_code_binary
 
 # Initialize the Flask app
@@ -52,7 +45,6 @@ def check_token(token):
     except jwt.InvalidTokenError:
         return {'error': 'invalid'}
 
-
 def get_patient_data(fhir_id):
     try:
         response = requests.get(f"{FHIR_SERVER_URL}/Patient/{fhir_id}", headers={"Accept": "application/fhir+json"})
@@ -62,11 +54,55 @@ def get_patient_data(fhir_id):
         print(f"Error fetching patient: {e}")
         return None
 
-
 @app.route('/')
 def index():
     return render_template('index.html')
 
+
+@app.route('/rescue_card')
+def rescue_card():
+    return render_template('RescueCard.html')
+@app.route('/rescue_card1')
+def rescue_card1():
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({'status': 'error', 'message': 'No token provided'}), 401
+
+    token = auth_header.split(" ")[1]
+    token_check = check_token(token)  # Your token validation logic
+    if not token_check or 'user_id' not in token_check:
+        return jsonify({'status': 'error', 'message': 'Invalid token'}), 401
+
+    user_id = token_check['user_id']
+
+    # Fetch patient data
+    patient = Patient.query.filter_by(user_id=user_id).first()
+    if not patient:
+        return jsonify({'status': 'error', 'message': 'Patient not found'}), 404
+
+    # Extract and process patient data
+    patient_data = PatientData()
+    patient_data.extract_data(filepath=None, json_string=json.dumps(patient.pat_data))
+
+    # Fetch all health data linked to the patient
+    health_records = HealthData.query.filter_by(patient_id=patient.id).all()
+    serialized_health_data = [
+        {
+            "type": record.data_type,
+            "timestamp": record.data_aqu_datetime.isoformat() if record.data_aqu_datetime else None,
+            "data": json.loads(record.h_data)  # Deserialize JSON field
+        }
+        for record in health_records
+    ]
+
+    print(serialized_health_data)
+
+    # Render the HTML template with patient and health data
+    return render_template(
+        'RescueCard.html',
+        patient=patient_data.__dict__,
+        health_data=serialized_health_data
+    )
 
 @app.route('/userPatientInfo')
 def userPatientInfo():
@@ -87,7 +123,6 @@ def userPatientInfo():
     medications = list(set(medications))
     manufacturers = list(set(manufacturers))
 
-
     conditions = []
     condition_codes = []
     condition_ids = []
@@ -107,11 +142,13 @@ def userPatientInfo():
             condition_ids.append(processed_condition)
 
     # Remove duplicates
-    #conditions = list(set(conditions))
-    #condition_codes = list(set(condition_codes))
-    #condition_ids = list(set(condition_ids))
+    # conditions = list(set(conditions))
+    # condition_codes = list(set(condition_codes))
+    # condition_ids = list(set(condition_ids))
 
-    return render_template('user_patient_info.html', medications=medications, manufacturers=manufacturers, conditions=conditions, condition_codes=condition_codes, condition_ids=condition_ids, zip=zip)
+    return render_template('user_patient_info.html', medications=medications, manufacturers=manufacturers,
+                           conditions=conditions, condition_codes=condition_codes, condition_ids=condition_ids, zip=zip)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -134,11 +171,10 @@ def register():
         patient_data = PatientData()
         patient_data.populate_from_dict(patient_register_data)
 
-
         patient_fhir_resource = json.loads(patient_data.create_fhir())
         resource_type = patient_fhir_resource.get("resourceType"),
 
-        fhir_id = save_resource("Patient",patient_fhir_resource)
+        fhir_id = save_resource("Patient", patient_fhir_resource)
 
         # Extract necessary fields
         email = patient_data.email
@@ -160,8 +196,8 @@ def register():
             name=f"{given_name} {last_name}",
             identifier=social_security_number,
             qr_code=generate_qr_code_binary(social_security_number),
-            pat_data=patient_fhir_resource ,# Save the entire Patient
-            fhir_id = fhir_id
+            pat_data=patient_fhir_resource,  # Save the entire Patient
+            fhir_id=fhir_id
         )
 
         try:
@@ -256,13 +292,15 @@ def get_patient_information():
         for record in health_records
     ]
 
+    print(serialized_health_data)
+
+
     # Include both patient data and health data in the response
     return jsonify({
         'status': 'success',
         'patient': patient_data.__dict__,
         'health_data': serialized_health_data
     })
-
 
 
 @app.route('/savePatientData', methods=['POST'])
@@ -328,6 +366,7 @@ def save_patient(patient_data_json, user_id):
     patient.pat_data = json.loads(patient_data.create_fhir())
     return patient
 
+
 def save_observations(observations, patient):
     if not isinstance(observations, list):
         raise ValueError("Invalid observations format, expected a list")
@@ -348,7 +387,7 @@ def save_observations(observations, patient):
 
             observation_fhire_resource = json.loads(json.dumps(observation.create_fhir(), separators=(',', ':')))
 
-            fhir_id=save_resource("Observation",json.loads(observation_fhire_resource))
+            fhir_id = save_resource("Observation", json.loads(observation_fhire_resource))
 
             existing_obs = HealthData.query.filter_by(
                 patient_id=patient.id,
@@ -371,16 +410,17 @@ def save_observations(observations, patient):
         except Exception as e:
             app.logger.error(f"Error processing observation: {obs_data}, Error: {str(e)}")
 
+
 def save_consent(consent_data, patient):
     if not isinstance(consent_data, dict) or not consent_data:
         return  # No consent data to process (either not a dict or it's empty)
 
     try:
         consent = ConsentData()
-        consent.populate_from_dict(consent_data,patient)
+        consent.populate_from_dict(consent_data, patient)
         consent_fhire_json = json.loads(json.dumps(consent.create_fhir()))
 
-        fhir_id=save_resource("Consent",json.loads(consent_fhire_json))
+        fhir_id = save_resource("Consent", json.loads(consent_fhire_json))
 
         data_aqu_datetime = datetime.now(timezone.utc).replace(microsecond=0)  # Remove microseconds
         # Convert to ISO 8601 format for FHIR
@@ -407,6 +447,7 @@ def save_consent(consent_data, patient):
     except Exception as e:
         app.logger.error(f"Error processing consent data: {str(e)}")
 
+
 def save_medications(medications, patient):
     if not isinstance(medications, list):
         return  # No medications to process
@@ -422,12 +463,11 @@ def save_medications(medications, patient):
             if key_to_find in medication_dict:
                 medication.code = medication_dict[key_to_find]
 
-
             medication.manufacturer = med.get('manufacturer')
 
             existing_med = HealthData.query.filter_by(
                 patient_id=patient.id,
-                data_type = med.get('medication')
+                data_type=med.get('medication')
             ).first()
 
             data_aqu_datetime = datetime.now(timezone.utc).replace(microsecond=0)  # Remove microseconds
@@ -436,8 +476,7 @@ def save_medications(medications, patient):
 
             medication_fhir_resource = json.loads(json.dumps(medication.create_fhir()))
 
-            fhir_id=save_resource("Medication",json.loads(medication_fhir_resource))
-
+            fhir_id = save_resource("Medication", json.loads(medication_fhir_resource))
 
             if existing_med:
                 existing_med.data = medication_fhir_resource
@@ -447,7 +486,7 @@ def save_medications(medications, patient):
                 new_med = HealthData(
                     patient_id=patient.id,
                     data_type=med.get('medication'),
-                    data_aqu_datetime = data_aqu_datetime,
+                    data_aqu_datetime=data_aqu_datetime,
                     h_data=medication_fhir_resource,
                     fhir_id=fhir_id,
                 )
@@ -455,6 +494,7 @@ def save_medications(medications, patient):
 
     except Exception as e:
         app.logger.error(f"Error processing medications: {str(e)}")
+
 
 def save_conditions(conditions, patient):
     if not isinstance(conditions, list):
@@ -480,7 +520,7 @@ def save_conditions(conditions, patient):
 
             condition_fhire_json = json.loads(json.dumps(condition.create_fhir()))
 
-            fhir_id=save_resource("Condition",json.loads(condition_fhire_json))
+            fhir_id = save_resource("Condition", json.loads(condition_fhire_json))
 
             existing_condition = HealthData.query.filter_by(
                 patient_id=patient.id,
@@ -503,6 +543,7 @@ def save_conditions(conditions, patient):
     except Exception as e:
         app.logger.error(f"Error processing conditions: {str(e)}")
 
+
 def save_allergies(allergies, patient):
     if not isinstance(allergies, list):
         return  # No allergies to process
@@ -515,7 +556,6 @@ def save_allergies(allergies, patient):
             allergy_data.clinical_status = "Active"
             allergy_data.patient_id = patient.id
 
-
             existing_allergy = HealthData.query.filter_by(
                 patient_id=patient.id,
                 data_type=allergy_data.type
@@ -523,7 +563,7 @@ def save_allergies(allergies, patient):
 
             allergy_fhire_json = json.loads(json.dumps(allergy_data.create_fhir()))
 
-            fhir_id=save_resource("AllergyIntolerance",json.loads(allergy_fhire_json))
+            fhir_id = save_resource("AllergyIntolerance", json.loads(allergy_fhire_json))
 
             data_aqu_datetime = datetime.now(timezone.utc).replace(microsecond=0)  # Remove microseconds
             # Convert to ISO 8601 format for FHIR
@@ -544,6 +584,7 @@ def save_allergies(allergies, patient):
 
     except Exception as e:
         app.logger.error(f"Error processing allergies: {str(e)}")
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=False)

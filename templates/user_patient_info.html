@@ -5,7 +5,10 @@
 
 {% block content %}
 <div class="container mt-5">
-    <button type="submit" id="updateDataFromFhir" class="btn btn-custom w-100">Update data from Fhir-Server</button>
+    <div class="top-right-button-container">
+        <a href="/rescue_card" class="btn btn-sm-custom">Rescue Card</a>
+    </div>
+<!--    <button type="submit" id="updateDataFromFhir" class="btn btn-custom w-100">Update data from Fhir-Server</button>-->
     <h1 class="text-center mb-4">Set up your Rescue Card</h1>
     <h2 class="text-center mb-4">Your Data</h2>
     <form method="POST" action="/userPatientInfo" class="needs-validation row g-3" novalidate>
@@ -92,7 +95,7 @@
             <label for="inputCountryCode" class="form-label">Country Code</label>
             <select id="inputCountryCode" name="countryCode" class="form-select" required>
                 <option value="" disabled>Choose...</option>
-                <option value="+43" >Austria (+43)</option>
+                <option value="+43">Austria (+43)</option>
                 <option value="+49">Germany (+49)</option>
                 <option value="+420">Czech Republic (+420)</option>
                 <option value="+421">Slovakia (+421)</option>
@@ -168,7 +171,7 @@
             <label for="inputContactCountryCode" class="form-label">Country Code</label>
             <select id="inputContactCountryCode" name="contactCountryCode" class="form-select">
                 <option value="" selected>Choose...</option>
-                <option value="+43" >Austria (+43)</option>
+                <option value="+43">Austria (+43)</option>
                 <option value="+49">Germany (+49)</option>
                 <option value="+420">Czech Republic (+420)</option>
                 <option value="+421">Slovakia (+421)</option>
@@ -293,7 +296,7 @@
                         <select id="medication_manufacturer" name="medication_manufacturer" class="form-select">
                             <option value="" disabled selected>Select Manufacturer</option>
                             {% for manufacturer in manufacturers %}
-                                 <option value="{{ manufacturer }}">{{ manufacturer }}</option>
+                            <option value="{{ manufacturer }}">{{ manufacturer }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -304,7 +307,7 @@
                         <select id="medication_name" name="medication_name" class="form-select">
                             <option value="" disabled selected>Select Medication</option>
                             {% for medication in medications %}
-                                <option value="{{ medication }}">{{ medication }}</option>
+                            <option value="{{ medication }}">{{ medication }}</option>
                             {% endfor %}
                         </select>
                     </div>
